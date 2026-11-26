@@ -1,0 +1,17 @@
+{
+  "name": "copilota-ai-act",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.js",
+    "backup": "node --env-file-if-exists=.env backup.js",
+    "test": "node --test",
+    "test:browser": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.1"
+  }
+}
