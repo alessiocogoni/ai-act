@@ -159,3 +159,26 @@ test("account, workspace persistente e PDF protetto", async ({
     await other.dispose();
   }
 });
+
+test("salva e ritrova valutazione ed evidenze nel Registro IA", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Apri registro", exact: true }).click();
+  await page.getByRole("button", { name: "Valuta", exact: true }).click();
+  await page.getByRole("combobox", { name: "Ruolo", exact: true }).selectOption("deployer");
+  await page.getByLabel("Contesto principale").selectOption("annex3");
+  await page.getByLabel("Responsabile").fill("Referente di prova");
+  await page.getByLabel("Data di riesame").fill("2027-01-15");
+  await page.getByLabel("Motivazione").fill("Il sistema supporta la valutazione dei candidati.");
+  await page.getByRole("button", { name: "Verifica obblighi possibili" }).click();
+  const oversight = page.getByLabel(/Documentare istruzioni d.uso, supervisione/);
+  await oversight.check();
+  await page.locator('[name="evidence-oversight"]').fill("Procedura HR di prova");
+  await page.getByRole("button", { name: "Salva valutazione nella scheda" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Valutazione salvata nel Registro IA." })).toBeVisible();
+  await page.reload();
+  await page.getByRole("button", { name: "Apri registro", exact: true }).click();
+  await page.getByRole("button", { name: "Valutazione salvata", exact: true }).click();
+  await expect(page.getByLabel("Responsabile")).toHaveValue("Referente di prova");
+  await expect(oversight).toBeChecked();
+  await expect(page.locator('[name="evidence-oversight"]')).toHaveValue("Procedura HR di prova");
+});

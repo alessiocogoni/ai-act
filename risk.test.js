@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { assess, localCopilot } from "./risk.js";
+import { assess, assessmentChecks, localCopilot } from "./risk.js";
 
 test("calendario Omnibus e obblighi indipendenti di trasparenza", () => {
   const result = assess({
@@ -29,4 +29,14 @@ test("Copilota locale: distingue le domande e propone un'azione", () => {
   assert.equal(localCopilot("Usiamo ChatGPT per le email", workspace).page, "systems");
   assert.match(localCopilot("Quali scadenze ho?", workspace).text, /piano: 1/);
   assert.equal(localCopilot("Ciao, da dove comincio?", workspace).page, "dashboard");
+});
+
+test("Checklist proporzionata a ruolo e scenario", () => {
+  const ids = (scenario, role, transparency) => assessmentChecks(scenario, role, transparency).map(item => item.id);
+  assert.deepEqual(ids("prohibited", "provider", true), ["scope", "prohibition"]);
+  assert.ok(ids("annex3", "deployer", true).includes("impact"));
+  assert.ok(ids("annex3", "deployer", true).includes("disclosure"));
+  assert.ok(!ids("annex3", "deployer", true).includes("technical"));
+  assert.ok(ids("annex1", "provider", true).includes("marking"));
+  assert.ok(!ids("annex1", "provider", true).includes("impact"));
 });

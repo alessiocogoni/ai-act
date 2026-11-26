@@ -1,5 +1,7 @@
 export const sources = {
   law: "https://eur-lex.europa.eu/eli/reg/2024/1689/oj?locale=it",
+  consolidated: "https://eur-lex.europa.eu/eli/reg/2024/1689/2026-07-27/ita/pdf",
+  transparency: "https://digital-strategy.ec.europa.eu/en/faqs/transparency-obligations-under-article-50-ai-act",
   amendment: "https://eur-lex.europa.eu/eli/reg/2026/1744/oj?locale=it",
   timeline:
     "https://digital-strategy.ec.europa.eu/en/news/ai-omnibus-enters-force",
@@ -22,7 +24,7 @@ export const scenarios = {
   ],
   transparency: [
     "Possibili obblighi di trasparenza (art. 50)",
-    "Verifica obblighi e deroghe per interazione con persone, marcatura dei contenuti o loro divulgazione. Applicazione generale dal 2 agosto 2026.",
+    "Verifica obblighi e deroghe per interazione con persone, marcatura dei contenuti o loro divulgazione. Applicazione generale dal 2 agosto 2026. Per alcuni sistemi già immessi sul mercato, il termine per la marcatura dei contenuti sintetici è il 2 dicembre 2026.",
   ],
   other: [
     "Servono altri elementi",
@@ -85,4 +87,35 @@ export function localCopilot(question, workspace) {
     return { text: "In Documenti puoi esportare i registri e preparare una bozza di policy. Per aggiungere la visura PDF, apri il profilo dell’organizzazione.", action: "Apri Documenti", page: "docs" };
   }
   return { text: "Per orientarti, dimmi quale strumento usi e per quale attività. Per esempio «Usiamo ChatGPT per scrivere email» o «Usiamo l’IA per selezionare candidati». Se stai iniziando, segui i passaggi della dashboard.", action: "Apri la dashboard", page: "dashboard" };
+}
+
+export function assessmentChecks(scenario, role, transparency) {
+  const checks = [
+    { id: "scope", label: "Documentare finalità, contesto e ruolo dell’organizzazione" }
+  ];
+  if (scenario === "prohibited") return [...checks,
+    { id: "prohibition", label: "Verificare le condizioni e le eventuali eccezioni applicabili al divieto (art. 5)" }
+  ];
+  if (scenario === "annex1" || scenario === "annex3") {
+    checks.push({ id: "classification", label: "Motivare la classificazione e le eventuali eccezioni (art. 6)" });
+    if (role === "provider") checks.push(
+      { id: "technical", label: "Verificare gestione del rischio, documentazione tecnica e registrazione dei log (artt. 9, 11, 12)" },
+      { id: "conformity", label: "Verificare procedura di valutazione della conformità e registrazione applicabili (artt. 43 e 49)" }
+    );
+    if (role === "deployer") checks.push(
+      { id: "oversight", label: "Documentare istruzioni d’uso, supervisione umana, monitoraggio e gestione dei log applicabili (art. 26)" },
+      { id: "impact", label: "Verificare se è richiesta una valutazione d’impatto sui diritti fondamentali (art. 27)" }
+    );
+  }
+  if (scenario === "transparency" || transparency) {
+    if (role !== "deployer") checks.push(
+      { id: "interaction", label: "Verificare quando informare chi interagisce direttamente con l’IA (art. 50, par. 1)" },
+      { id: "marking", label: "Verificare se è richiesta la marcatura dei contenuti sintetici e quali eccezioni si applicano (art. 50, par. 2)" }
+    );
+    if (role !== "provider") checks.push(
+      { id: "disclosure", label: "Verificare gli obblighi di informazione o divulgazione per deepfake, testi di interesse pubblico e gli altri casi pertinenti (art. 50, parr. 3–4)" }
+    );
+  }
+  checks.push({ id: "literacy", label: "Documentare le misure di alfabetizzazione IA in base a persone e contesto (art. 4)" });
+  return checks;
 }

@@ -1,0 +1,80 @@
+/* Palette and type for a regulatory workspace. */
+:root {
+  color-scheme: light;
+  --ink: #182939;
+  --muted: #486073;
+  --line: #dce5eb;
+  --accent: #17574e;
+  --gradient: linear-gradient(135deg, #215e55, #16473f);
+  --soft-gradient: linear-gradient(135deg, #f0f7f5, #f8fbfa);
+}
+body { background: #f4f7f9; color: var(--ink); font: 15px/1.5 system-ui, sans-serif; }
+aside { background: #112635; border: 0; color: #fff; box-shadow: none; }
+aside .brand { color: #fff; letter-spacing: .08em; }
+.brand svg rect { fill: #387d70; }
+aside small, aside label { color: #c3d3dc; }
+aside select { background: #203b4c; color: #fff; border-color: #536a79; }
+nav details > summary, nav button[data-page] { color: #dae7ee; }
+nav details > summary::marker { color: #96bbb4; }
+nav details[open] > summary, nav summary:hover, nav button[data-page]:hover {
+  background: #203c4d; color: white; border-color: #385462;
+}
+nav button[data-page].active, nav button[data-page][aria-current="page"] {
+  background: #d8ebe6; color: #153d36;
+}
+header { background: #fbfdfe; color: var(--ink); min-height: 62px; box-shadow: none; }
+header span { color: var(--muted); }
+#content { width: 100%; max-width: 1320px; padding: clamp(20px, 3.3vw, 48px); }
+h1, h2, h3, .metric { font-family: Georgia, Cambria, serif; letter-spacing: -.018em; }
+h1 { font-size: clamp(1.9rem, 3.6vw, 2.9rem); line-height: 1.13; }
+h2 { line-height: 1.22; }
+.muted, .field-help { color: var(--muted); }
+.card { border-color: var(--line); border-radius: 12px; box-shadow: 0 7px 25px #18293908; }
+.cards .card { border-top-color: #73a69b; }
+.metric, .doc-sources a, a { color: var(--accent); }
+button, .float { background: #17574e; color: #fff; border-radius: 8px; box-shadow: none; font-weight: 650; }
+button.secondary, button.launch-step, .cards button[data-start] {
+  background: #edf5f3; color: #16473f; border: 1px solid #cbded9;
+}
+button.launch-step:hover, .cards button[data-start]:hover { background: #dcece8; color: #173f38; }
+.launch-step { min-height: 86px; }
+.pill, .risk-trigger { background: #e9f2f0; color: #244e47; }
+input, select, textarea { max-width: 100%; min-width: 0; font: inherit; }
+input, select, textarea, #policyText { border: 1px solid #b9c9d2; background: white; color: var(--ink); border-radius: 8px; }
+textarea { padding: 11px; resize: vertical; }
+:is(button, input, select, textarea, summary, a):focus-visible { outline: 2px solid #408475; outline-offset: 3px; }
+th { background: #edf3f6; color: #334d5e; }
+tbody tr:hover { background: #f5f9fb; }
+td button { margin: 2px 0; }
+.example-picker, .org-note, .visura-panel { background: #f0f6f5; border-color: #c7dcd7; color: #27574e; }
+.example-picker label, .org-icon, .dropzone, .dropzone .upload-symbol { color: #17574e; }
+.org-icon, .dropzone .upload-symbol { background: #e3efe9; }
+.doc-icon, .chathead { background: #17574e; color: #fff; }
+.chat { border-color: var(--line); box-shadow: 0 16px 42px #11263530; }
+.chathead button { background: #fff; color: #17574e; }
+.messages { background: #f7fafb; }
+.bubble { background: #e9f0f4; }
+.mine { background: #dceee9; }
+.float { box-shadow: 0 7px 26px #11263527; }
+#accountStatus { background: #e7f1ee; }
+#assessment { display: grid; gap: 15px; }
+#assessment button { justify-self: start; }
+.assessment-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.check-label { display: flex; gap: 8px; align-items: baseline; }
+#assessment .check-label input { margin: 0; accent-color: #17574e; }
+#assessmentResult:empty, #assessmentNotice:empty { display: none; }
+#assessmentResult fieldset { padding: 16px; margin: 0 0 16px; border: 1px solid #c9d8df; min-width: 0; border-radius: 8px; }
+#assessmentResult legend { font-weight: 680; }
+.evidence-row + .evidence-row { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+.assessment-sources { margin-top: 18px; }
+@media (max-width: 760px) {
+  .assessment-grid { grid-template-columns: 1fr; }
+  .chat { right: 16px; bottom: 72px; }
+  .messages { height: min(300px, 44dvh); }
+  header span { margin-left: 0; }
+}
+@media print {
+  aside, header, .float, .chat { display: none !important; }
+  main { margin: 0; }
+  body { background: white; }
+}

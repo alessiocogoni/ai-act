@@ -46,6 +46,7 @@ const files = new Map(
     ["/index.html", ["index.html", "text/html; charset=utf-8"]],
     ["/app.js", ["app.js", "text/javascript; charset=utf-8"]],
     ["/risk.js", ["risk.js", "text/javascript; charset=utf-8"]],
+    ["/workspace.css", ["workspace.css", "text/css; charset=utf-8"]],
   ].map(([url, [file, type]]) => [
     url,
     { body: readFileSync(new URL(file, import.meta.url)), type },

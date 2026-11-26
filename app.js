@@ -1,4 +1,4 @@
-import { assess, localCopilot, sources } from "./risk.js";
+import { assess, assessmentChecks, localCopilot, sources } from "./risk.js";
 
 const $ = (id) => document.getElementById(id),
   esc = (v) =>
@@ -37,7 +37,8 @@ const titles = {
   tasks: "Attività e scadenze",
   settings: "Impostazioni",
 };
-function go(p) {
+function go(p, system = "") {
+  assessmentSystem = system;
   page = p;
   filter = "";
   document.body.classList.remove("mobileopen");
@@ -46,6 +47,7 @@ function go(p) {
 document
   .querySelectorAll("[data-page]")
   .forEach((b) => (b.onclick = () => go(b.dataset.page)));
+let assessmentSystem = "";
 function table(type) {
   const rows = state[type].filter((x) =>
     JSON.stringify(x).toLowerCase().includes(filter.toLowerCase()),
@@ -65,7 +67,7 @@ function table(type) {
           esc(type === "systems" ? x.purpose : x.date) +
           '</td><td><span class="pill">' +
           esc(type === "systems" ? x.risk : x.status) +
-          '</span></td><td><button class="secondary" data-edit="' +
+          '</span></td><td>' + (type === 'systems' ? '<button class="secondary" data-assess="' + esc(x.id) + '">' + (x.assessment ? 'Valutazione salvata' : 'Valuta') + '</button> ' : '') + '<button class="secondary" data-edit="' +
           esc(x.id) +
           '">Modifica</button> <button class="secondary" data-delete="' +
           esc(x.id) +
@@ -127,6 +129,13 @@ function renderCore() {
   if (page === "risk") bindAssessment();
 }
 function bindRows() {
+  document.querySelectorAll("[data-assess]").forEach(button => {
+    button.onclick = () => go("risk", button.dataset.assess);
+  });
+  if (managed && current.role === "viewer") {
+    document.querySelectorAll("[data-edit], [data-delete]").forEach(button => { button.hidden = true; });
+    return;
+  }
   document
     .querySelectorAll("[data-edit]")
     .forEach(
@@ -232,7 +241,7 @@ $("copilot").onclick = () => {
 };
 $("closechat").onclick = () => ($("chat").hidden = true);
 const extraTitles = {
-  home: "Copilota",
+  home: "Guida AI Act",
   training: "Formazione",
   docs: "Documenti",
   profile: "Organizzazione",
@@ -839,6 +848,14 @@ const docGroups = {
       ["name", "Sistema IA"],
       ["purpose", "Finalità"],
       ["risk", "Rischio"],
+      ["assessment.title", "Esito screening"],
+      ["assessment.role", "Ruolo"],
+      ["assessment.reason", "Motivazione"],
+      ["assessment.owner", "Responsabile"],
+      ["assessment.date", "Data valutazione"],
+      ["assessment.sourceDate", "Fonti verificate il"],
+      ["assessment.review", "Data riesame"],
+      ["assessment.evidence", "Verifiche ed evidenze"],
     ],
   ],
   tasks: [
@@ -860,6 +877,13 @@ const docGroups = {
     ],
   ],
 };
+function exportValue(record, key) {
+  if (key === "assessment.evidence") return Object.values(record.assessment?.evidence || {}).map(item =>
+    item.label + " (" + (item.done ? "verificata" : "da verificare") + ")" + (item.reference ? " · " + item.reference : "")
+  ).join("\n");
+  if (key.startsWith("assessment.")) return record.assessment?.[key.slice(11)];
+  return record[key];
+}
 function exportCSV(k) {
   const cols = docGroups[k][2],
     cell = (v) =>
@@ -870,7 +894,7 @@ function exportCSV(k) {
       '"';
   const csv = [
     cols.map((c) => cell(c[1])).join(";"),
-    ...(state[k] || []).map((x) => cols.map((c) => cell(x[c[0]])).join(";")),
+    ...(state[k] || []).map((x) => cols.map((c) => cell(exportValue(x, c[0]))).join(";")),
   ].join("\r\n");
   const url = URL.createObjectURL(
     new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8" }),
@@ -900,7 +924,7 @@ function exportPDF(k, draft) {
           .map(
             (x) =>
               "<tr>" +
-              g[2].map((c) => "<td>" + esc(x[c[0]]) + "</td>").join("") +
+              g[2].map((c) => "<td>" + esc(exportValue(x, c[0])) + "</td>").join("") +
               "</tr>",
           )
           .join("") ||
@@ -1208,38 +1232,102 @@ function bindConsultations() {
 }
 
 function renderAssessment() {
-  return `<div class="card">
-    <p>Valuta la finalità effettiva e il ruolo dell’organizzazione. L’esito è orientativo e richiede una verifica sul caso concreto.</p>
+  const record = state.systems.find(item => item.id === assessmentSystem);
+  const saved = record?.assessment;
+  const readonly = managed && current.role === "viewer";
+  const selected = (key, value) => saved?.[key] === value ? " selected" : "";
+  return `<div class="card assessment-card">
+    <p>Verifica quali obblighi approfondire e conserva la motivazione della decisione.</p>
     <form id="assessment">
-      <label>Ruolo<select name="role"><option value="unknown">Da chiarire</option><option value="provider">Fornitore</option><option value="deployer">Deployer</option></select></label>
-      <label>Contesto principale<select name="scenario" required>
-        <option value="">Seleziona</option><option value="prohibited">Possibile pratica vietata, es. social scoring</option>
-        <option value="annex1">Prodotto regolamentato o componente di sicurezza</option>
-        <option value="annex3">Finalità dell’allegato III, es. selezione del personale</option>
-        <option value="transparency">Chatbot, deepfake o altri contenuti sintetici</option><option value="other">Altro o informazioni insufficienti</option>
+      <label>Sistema del Registro IA<select name="system">
+        <option value="">Screening senza salvataggio</option>
+        ${state.systems.map(item => `<option value="${esc(item.id)}"${item === record ? " selected" : ""}>${esc(item.name)}</option>`).join("")}
       </select></label>
-      <label><span><input type="checkbox" name="transparency"> Il sistema interagisce con persone o genera contenuti</span></label>
-      <button>Verifica obblighi possibili</button>
+      <div class="assessment-grid">
+        <label>Ruolo<select name="role"><option value="unknown">Da chiarire</option><option value="provider"${selected("role", "provider")}>Fornitore</option><option value="deployer"${selected("role", "deployer")}>Utilizzatore (deployer)</option></select></label>
+        <label>Contesto principale<select name="scenario" required>
+          <option value="">Seleziona</option>
+          <option value="prohibited"${selected("scenario", "prohibited")}>Possibile pratica vietata</option>
+          <option value="annex1"${selected("scenario", "annex1")}>Prodotto regolamentato o componente di sicurezza</option>
+          <option value="annex3"${selected("scenario", "annex3")}>Finalità dell’allegato III, es. selezione del personale</option>
+          <option value="transparency"${selected("scenario", "transparency")}>Chatbot, deepfake o altri contenuti sintetici</option>
+          <option value="other"${selected("scenario", "other")}>Altro o informazioni insufficienti</option>
+        </select></label>
+      </div>
+      <label class="check-label"><input type="checkbox" name="transparency"${saved?.transparency ? " checked" : ""}> Interagisce direttamente con persone o genera contenuti</label>
+      <div class="assessment-grid">
+        <label>Responsabile<input name="owner" maxlength="150" value="${esc(saved?.owner)}" ${readonly ? "readonly" : ""}></label>
+        <label>Data di riesame<input type="date" name="review" value="${esc(saved?.review)}" ${readonly ? "readonly" : ""}></label>
+      </div>
+      <label>Motivazione<textarea name="reason" rows="3" maxlength="1600" ${readonly ? "readonly" : ""}>${esc(saved?.reason)}</textarea></label>
+      ${saved?.date ? `<p class="muted">Ultimo salvataggio ${esc(saved.date.slice(0, 10))}.</p>` : ""}
+      <button type="submit">Verifica obblighi possibili</button>
+      <div id="assessmentResult" aria-live="polite"></div>
+      <p id="assessmentNotice" role="status"></p>
     </form>
-    <div id="assessmentResult" aria-live="polite"></div>
-    <p><a href="${sources.law}">Regolamento (UE) 2024/1689</a> · <a href="${sources.amendment}">Regolamento (UE) 2026/1744</a> · <a href="${sources.timeline}">Calendario di applicazione</a> · <a href="${sources.guidance}">Commissione europea</a></p>
+    <div class="assessment-sources"><a href="${sources.consolidated}">AI Act consolidato</a> · <a href="${sources.amendment}">Digital Omnibus</a> · <a href="${sources.timeline}">Calendario UE</a> · <a href="${sources.transparency}">Guida alla trasparenza</a></div>
   </div>`;
 }
+
 function bindAssessment() {
-  $("assessment").onsubmit = (event) => {
-    event.preventDefault();
-    const result = assess(Object.fromEntries(new FormData(event.target)));
-    if (!result) return;
-    $("assessmentResult").innerHTML =
-      "<h2>" +
-      esc(result.title) +
-      "</h2><ul>" +
-      result.next.map((value) => "<li>" + esc(value) + "</li>").join("") +
-      '</ul><p class="muted">Fonti verificate il ' +
-      esc(result.checked) +
-      ".</p>";
+  const form = $("assessment");
+  const resultBox = $("assessmentResult");
+  const notice = $("assessmentNotice");
+  const readonly = managed && current.role === "viewer";
+  const system = state.systems.find(item => item.id === assessmentSystem);
+  const renderResult = (result, previous = {}, showSave = false) => {
+    const checks = assessmentChecks(form.elements.scenario.value, form.elements.role.value, form.elements.transparency.checked);
+    resultBox.innerHTML = `<h2>${esc(result.title)}</h2><ul>${result.next.map(value => `<li>${esc(value)}</li>`).join("")}</ul>
+      <p class="muted">Esito orientativo. Fonti verificate il ${esc(result.checked)}.</p>
+      <fieldset><legend>Verifiche ed evidenze</legend>${checks.map(check => {
+        const evidence = previous[check.id];
+        return `<div class="evidence-row">
+          <label class="check-label"><input name="done-${check.id}" type="checkbox" ${evidence?.done ? "checked" : ""} ${readonly ? "disabled" : ""}> ${esc(check.label)}</label>
+          <label>Riferimento all’evidenza<input name="evidence-${check.id}" maxlength="500" value="${esc(evidence?.reference)}" placeholder="Es. procedura interna, versione o riferimento" ${readonly ? "readonly" : ""}></label>
+        </div>`;
+      }).join("")}</fieldset>
+      ${system && !readonly && showSave ? '<button id="saveAssessment" type="button">Salva valutazione nella scheda</button>' : ""}`;
+    if (!$("saveAssessment")) return;
+    $("saveAssessment").onclick = () => {
+      for (const key of ["owner", "review", "reason"]) {
+        const field = form.elements[key];
+        if (!field.value.trim()) {
+          notice.textContent = "Completa responsabile, data di riesame e motivazione per salvare.";
+          field.focus();
+          return;
+        }
+      }
+      const previousAssessment = system.assessment;
+      system.assessment = {
+        role: form.elements.role.value, scenario: form.elements.scenario.value,
+        transparency: form.elements.transparency.checked, title: result.title,
+        owner: form.elements.owner.value.trim(), review: form.elements.review.value,
+        reason: form.elements.reason.value.trim(), date: new Date().toISOString(),
+        sourceDate: result.checked,
+        evidence: { ...previousAssessment?.evidence, ...Object.fromEntries(checks.map(check => [check.id, {
+          label: check.label, done: form.elements["done-" + check.id].checked,
+          reference: form.elements["evidence-" + check.id].value.trim()
+        }])) }
+      };
+      if (!save()) { system.assessment = previousAssessment; return; }
+      notice.textContent = managed ? "Valutazione pronta. Premi Salva modifiche sul server per sincronizzarla." : "Valutazione salvata nel Registro IA.";
+    };
   };
+  form.elements.system.onchange = () => {
+    assessmentSystem = form.elements.system.value;
+    render();
+  };
+  const showResult = () => {
+    const result = assess(Object.fromEntries(new FormData(form)));
+    if (result) renderResult(result, system?.assessment?.evidence, true);
+  };
+  form.onsubmit = event => { event.preventDefault(); showResult(); };
+  for (const key of ["role", "scenario", "transparency"]) {
+    form.elements[key].onchange = () => { resultBox.replaceChildren(); notice.textContent = ""; };
+  }
+  if (system?.assessment) showResult();
 }
+
 
 let endpointAvailable = false;
 let credentials;
@@ -1606,6 +1694,7 @@ function render() {
     } else button.removeAttribute("aria-current");
   });
   $("crumb").textContent = titles[page] || "";
+  $("copilot").textContent = managed && credentials?.aiEnabled ? "Copilota AI" : "Guida AI Act";
   if ($("enableAI"))
     $("enableAI").hidden = !(managed && credentials?.aiEnabled && current.id);
 }
@@ -1625,6 +1714,7 @@ $("chatForm").onsubmit = async (event) => {
     $("messages").scrollTop = $("messages").scrollHeight;
   };
   add(question, "bubble mine");
+  $("chatMode").textContent = managed && credentials?.aiEnabled && $("aiConsent").checked ? "Copilota generativo" : "Guida AI Act · risposte a regole";
   if (!managed || !id || !credentials?.aiEnabled || !$("aiConsent").checked) {
     const reply = localCopilot(question, state);
     add(reply.text, "bubble");

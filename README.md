@@ -36,7 +36,7 @@ Copiare `.env.example` in `.env` o impostare le stesse variabili nel servizio di
 
 ## Screening e fonti
 
-Lo screening è orientativo. Il risultato dipende dalla finalità, dal contesto, dal ruolo e dalle condizioni applicabili. Le date generali riportate per l’alto rischio e la trasparenza prevedono eccezioni e transizioni specifiche.
+Lo screening è orientativo. Dal Registro IA si può salvare la valutazione per ciascun sistema, con motivazione, responsabile, data di riesame, checklist ed evidenze. Le esportazioni del Registro IA includono questi dati. Il risultato dipende dalla finalità, dal contesto, dal ruolo e dalle condizioni applicabili. Le date generali riportate per l’alto rischio e la trasparenza prevedono eccezioni e transizioni specifiche.
 
 - [Regolamento (UE) 2024/1689](https://eur-lex.europa.eu/eli/reg/2024/1689/oj?locale=it)
 - [Regolamento (UE) 2026/1744, Digital Omnibus sull’IA](https://eur-lex.europa.eu/eli/reg/2026/1744/oj?locale=it)
