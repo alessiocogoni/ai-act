@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { assess } from "./risk.js";
+import { assess, localCopilot } from "./risk.js";
 
 test("calendario Omnibus e obblighi indipendenti di trasparenza", () => {
   const result = assess({
@@ -20,4 +20,13 @@ test("calendario Omnibus e obblighi indipendenti di trasparenza", () => {
     1,
   );
   assert.equal(assess({ scenario: "toString", role: "unknown" }), null);
+});
+
+test("Copilota locale: distingue le domande e propone un'azione", () => {
+  const workspace = { systems: [{}], tasks: [{ status: "Completata" }, { status: "Da fare" }] };
+  assert.equal(localCopilot("Usiamo l’IA per valutare i CV", workspace).page, "risk");
+  assert.match(localCopilot("Abbiamo un chatbot clienti?", workspace).text, /art\. 50/);
+  assert.equal(localCopilot("Usiamo ChatGPT per le email", workspace).page, "systems");
+  assert.match(localCopilot("Quali scadenze ho?", workspace).text, /piano: 1/);
+  assert.equal(localCopilot("Ciao, da dove comincio?", workspace).page, "dashboard");
 });

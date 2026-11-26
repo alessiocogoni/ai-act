@@ -1,4 +1,4 @@
-import { assess, sources } from "./risk.js";
+import { assess, localCopilot, sources } from "./risk.js";
 
 const $ = (id) => document.getElementById(id),
   esc = (v) =>
@@ -231,36 +231,6 @@ $("copilot").onclick = () => {
   $("chat").hidden = true;
 };
 $("closechat").onclick = () => ($("chat").hidden = true);
-$("chatForm").onsubmit = (e) => {
-  e.preventDefault();
-  let q = $("question").value.trim();
-  if (!q) return;
-  const add = (s, m) => {
-    let d = document.createElement("div");
-    d.className = "bubble" + (m ? " mine" : "");
-    d.textContent = s;
-    $("messages").append(d);
-  };
-  add(q, true);
-  let t = q.toLowerCase();
-  add(
-    /risch|classific/.test(t)
-      ? "Apri il Registro IA dalla Dashboard e consulta le descrizioni dei livelli di rischio. Verifica poi la classificazione con un professionista."
-      : /scadenz|attivit/.test(t)
-        ? "Hai " +
-          state.tasks.filter((x) => x.status !== "Completata").length +
-          " attività aperte. Puoi aggiornarle nella sezione Piano d’azione."
-        : /registr|sistem/.test(t)
-          ? "Hai " +
-            state.systems.length +
-            " sistemi registrati. Apri Registro sistemi AI per aggiungere finalità e rischio preliminare."
-          : "Sei nella sezione " +
-            titles[page] +
-            ". Posso aiutarti con registro sistemi, rischi e scadenze. Formula una domanda su questi argomenti.",
-  );
-  $("question").value = "";
-  $("messages").scrollTop = $("messages").scrollHeight;
-};
 const extraTitles = {
   home: "Copilota",
   training: "Formazione",
@@ -393,7 +363,7 @@ function renderExtra() {
     h +=
       '<p class="muted">' +
       esc(current.name) +
-      '</p><div class="card"><h1>Da quale uso dell’IA vuoi partire?</h1><p>Descrivimi un’attività in cui usate l’intelligenza artificiale. Usa il registro per creare una scheda e il piano per annotare le verifiche necessarie.</p><div class="cards"><button data-start="census">Censisci un uso dell’IA<br>Parti da uno strumento e da un’attività.</button><button data-start="hr">Gestionale HR<br>Valuta l’uso dell’IA sui CV.</button><button data-start="plan">Rivedi il piano<br>Controlla le azioni aperte.</button></div><form id="homechat"><input name="message" placeholder="Es. Usiamo IA per rispondere ai clienti" required style="width:75%"><button>Invia</button></form></div>';
+      '</p><div class="card"><h1>Da quale uso dell’IA vuoi partire?</h1><p>Descrivimi un’attività in cui usate l’intelligenza artificiale. Usa il registro per creare una scheda e il piano per annotare le verifiche necessarie.</p><div class="cards"><button data-start="census">Censisci un uso dell’IA<br>Parti da uno strumento e da un’attività.</button><button data-start="hr">Gestionale HR<br>Valuta l’uso dell’IA sui CV.</button><button data-start="plan">Rivedi il piano<br>Controlla le azioni aperte.</button></div><form id="homechat"><input name="message" maxlength="1500" aria-label="Domanda per il Copilota" placeholder="Es. Usiamo IA per rispondere ai clienti" required style="width:75%"><button>Invia</button></form></div>';
   } else if (page === "profile") {
     h +=
       '<div class="card"><h2>Profilo e visura</h2><p class="muted">Identifica l’organizzazione e il referente per la gestione della compliance IA.</p><form id="profileform"><label>Ragione sociale<input name="name" placeholder="Es. Rossi Srl" required value="' +
@@ -1640,15 +1610,7 @@ function render() {
     $("enableAI").hidden = !(managed && credentials?.aiEnabled && current.id);
 }
 
-const localChat = $("chatForm").onsubmit;
 $("chatForm").onsubmit = async (event) => {
-  if (
-    !$("aiConsent").checked ||
-    !managed ||
-    !current.id ||
-    !credentials?.aiEnabled
-  )
-    return localChat(event);
   event.preventDefault();
   const input = $("question");
   const question = input.value.trim();
@@ -1663,6 +1625,21 @@ $("chatForm").onsubmit = async (event) => {
     $("messages").scrollTop = $("messages").scrollHeight;
   };
   add(question, "bubble mine");
+  if (!managed || !id || !credentials?.aiEnabled || !$("aiConsent").checked) {
+    const reply = localCopilot(question, state);
+    add(reply.text, "bubble");
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "secondary";
+    button.textContent = reply.action;
+    button.onclick = () => {
+      $("chat").hidden = true;
+      go(reply.page);
+    };
+    $("messages").append(button);
+    $("messages").scrollTop = $("messages").scrollHeight;
+    return;
+  }
   try {
     const result = await api("orgs/" + id + "/copilot", "POST", { question });
     if (!managed || current.id !== id) return;

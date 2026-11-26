@@ -56,3 +56,33 @@ export function assess({ scenario, role, transparency }) {
   }
   return { title, next, sources, checked: "2026-11-26" };
 }
+
+export function localCopilot(question, workspace) {
+  const input = question.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "");
+  if (/social scoring|manipol|vietat|nudif/.test(input)) {
+    return { text: "Potrebbe essere una pratica vietata. Verifica prima le condizioni e le eccezioni dell’art. 5 per il tuo caso.", action: "Apri lo screening", page: "risk" };
+  }
+  if (/\bcv\b|candidat|recruit|selezione del personale/.test(input)) {
+    return { text: "Se l’IA filtra o valuta candidati, verifica l’Allegato III e le condizioni dell’art. 6. Indica nello screening se sviluppi il sistema o lo usi nella tua organizzazione.", action: "Apri lo screening", page: "risk" };
+  }
+  if (/chatbot|assistente virtuale|deepfake|contenut.{0,15}sintetic|trasparenz/.test(input)) {
+    return { text: "Se l’IA interagisce con i clienti o genera contenuti sintetici, verifica se si applicano gli obblighi di trasparenza dell’art. 50.", action: "Apri lo screening", page: "risk" };
+  }
+  if (/scadenz|attivit|piano d.azione|intervent/.test(input)) {
+    const count = workspace.tasks.filter(task => task.status !== "Completata").length;
+    return { text: "Attività aperte nel tuo piano: " + count + ". Per ogni verifica indica cosa fare e la data entro cui completarla.", action: "Apri il piano d’azione", page: "tasks" };
+  }
+  if (/formaz|alfabetizz|corso/.test(input)) {
+    return { text: "Pianifica la formazione IA tenendo conto dei ruoli, delle competenze e del contesto d’uso. Puoi registrare corso, destinatari e stato.", action: "Apri Formazione", page: "training" };
+  }
+  if (/ris[ck]h|classific|obbligh|conformit/.test(input)) {
+    return { text: "Parti dalla finalità concreta del sistema e dal ruolo dell’organizzazione. Lo screening ti indica quali obblighi verificare.", action: "Apri lo screening", page: "risk" };
+  }
+  if (/chatgpt|copilot|gemini|claude|email|\bmail\b|bozz|registr|sistem|strument|usiamo|utilizziamo/.test(input)) {
+    return { text: "Nel Registro IA hai " + workspace.systems.length + " sistemi. Per aggiungerne uno, indica strumento e finalità concreta. Se lo usi per scrivere email o bozze, annota anche chi rivede il risultato prima dell’invio.", action: "Apri il Registro IA", page: "systems" };
+  }
+  if (/document|policy|visur|export|esport/.test(input)) {
+    return { text: "In Documenti puoi esportare i registri e preparare una bozza di policy. Per aggiungere la visura PDF, apri il profilo dell’organizzazione.", action: "Apri Documenti", page: "docs" };
+  }
+  return { text: "Per orientarti, dimmi quale strumento usi e per quale attività. Per esempio «Usiamo ChatGPT per scrivere email» o «Usiamo l’IA per selezionare candidati». Se stai iniziando, segui i passaggi della dashboard.", action: "Apri la dashboard", page: "dashboard" };
+}
