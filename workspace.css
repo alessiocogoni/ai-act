@@ -97,3 +97,13 @@ button.launch-step:hover{background:var(--soft-gradient);transform:translateY(-2
 .source-card{display:flex;flex-direction:column;overflow:hidden;border:1px solid #e5e5f2;border-radius:16px;text-decoration:none;background:#fff;color:#252943;transition:transform .18s,box-shadow .18s}.source-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px #7161b022}.source-art{height:116px;display:grid;place-items:center;background:var(--gradient);font-size:48px;font-weight:750;color:#51418a;letter-spacing:.08em}.eu-art{background:linear-gradient(135deg,#d9efff,#c7b7fa)}.law-art{background:linear-gradient(135deg,#e6e0ff,#c9eaff)}.guide-art{background:linear-gradient(135deg,#b9e6ff,#eee4ff)}.source-body{display:flex;flex-direction:column;flex:1;padding:18px;gap:8px}.source-body small{font-size:10px;letter-spacing:.07em;color:#6651a9;font-weight:750}.source-body h3{font-size:17px;margin:0}.source-body p{margin:0;color:#68728a;font-size:14px}.source-body strong{margin-top:auto;padding-top:12px;font-size:13px;color:#51418a}
 .settings-card{display:flex;flex-direction:column;align-items:flex-start;gap:10px}.settings-card h2{font-size:18px;margin:0}.settings-card p{margin:0}.settings-card button,.settings-card .pill{margin-top:auto}.settings-panel,.technical-tools{margin:16px 0}.technical-tools summary{cursor:pointer;font-weight:650;color:#51418a}.settings-panel form{display:grid;gap:12px;max-width:580px;margin:16px 0}.settings-panel form button{justify-self:start}
 @media(max-width:1050px){.launch-grid,.source-grid,.settings-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:620px){.launch-grid,.source-grid,.settings-grid{grid-template-columns:1fr}.launch-guide{padding:18px}button.launch-step{min-height:180px}}@media(prefers-reduced-motion:reduce){.launch-step,.source-card{transition:none}}
+
+/* Continuous atmospheric canvas across the workspace. */
+html{min-height:100%;background:#e7e4ff}
+body{min-height:100vh;min-height:100dvh;background:linear-gradient(125deg,#b9e6ff 0%,#d9efff 24%,#f2edff 53%,#dfd3ff 77%,#c7b7fa 100%);background-attachment:fixed;background-size:cover}
+main,#content{background:transparent;min-width:0}
+aside{background:rgba(255,255,255,.84);backdrop-filter:blur(18px);border-right:1px solid rgba(255,255,255,.9)}
+header{background:rgba(255,255,255,.68);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.9)}
+.card{background:#fff;border-color:#e2ddf1;box-shadow:0 8px 28px #51418a0c}
+aside .brand svg{flex-shrink:0;width:40px;height:40px}
+@media print{html,body,main,#content{background:#fff!important}.card{box-shadow:none}}
