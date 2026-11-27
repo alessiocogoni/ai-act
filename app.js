@@ -1682,24 +1682,28 @@ async function runForm(form, action) {
 function render() {
   if (!current.id && page !== "settings") {
     const section = titles[page] || "Dashboard";
-    $("content").innerHTML = '<h1>'+esc(section)+'</h1><div class="card" style="max-width:720px;margin:24px auto;padding:30px"><h2>Seleziona un’organizzazione</h2><p class="muted">Per aprire '+esc(section)+' scegli lo spazio di lavoro. Nessuna organizzazione viene selezionata automaticamente.</p><div id="workspaceChoices" class="workspace-choices"></div></div>';
-    for (const option of $("orgSelect").options) {
-      if (!option.value) continue;
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "secondary";
-      button.textContent = option.textContent;
-      button.onclick = () => {
-        $("orgSelect").value = option.value;
-        $("orgSelect").onchange();
-      };
-      $("workspaceChoices").append(button);
-    }
-    if (managed && !orgs.length) {
-      const button = document.createElement("button");
-      button.textContent = "Gestisci organizzazioni";
-      button.onclick = () => go("settings");
-      $("workspaceChoices").append(button);
+    if (page === "dashboard") {
+      $("content").innerHTML = '<h1>Dashboard</h1>';
+    } else {
+      $("content").innerHTML = '<h1>'+esc(section)+'</h1><div class="card" style="max-width:720px;margin:24px auto;padding:30px"><h2>Seleziona un’organizzazione</h2><p class="muted">Per aprire '+esc(section)+' scegli lo spazio di lavoro. Nessuna organizzazione viene selezionata automaticamente.</p><div id="workspaceChoices" class="workspace-choices"></div></div>';
+      for (const option of $("orgSelect").options) {
+        if (!option.value) continue;
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "secondary";
+        button.textContent = option.textContent;
+        button.onclick = () => {
+          $("orgSelect").value = option.value;
+          $("orgSelect").onchange();
+        };
+        $("workspaceChoices").append(button);
+      }
+      if (managed && !orgs.length) {
+        const button = document.createElement("button");
+        button.textContent = "Gestisci organizzazioni";
+        button.onclick = () => go("settings");
+        $("workspaceChoices").append(button);
+      }
     }
     $("crumb").textContent = section;
     $("copilot").hidden = true;
