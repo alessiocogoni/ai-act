@@ -1,4 +1,4 @@
-import { assess, assessmentChecks, localCopilot, sources } from "./risk.js";
+import { assess, assessmentChecks, localCopilot, sources, workspacePriorities } from "./risk.js?v=operational-priorities";
 
 const $ = (id) => document.getElementById(id),
   esc = (v) =>
@@ -80,6 +80,26 @@ function table(type) {
     (!rows.length ? '<p class="muted">Nessun elemento presente.</p>' : "")
   );
 }
+
+function dashboardPriorities() {
+  const p = workspacePriorities(state);
+  const format = value => value.split("-").reverse().join("/");
+  const list = (items, renderItem) => items.length
+    ? '<ul>'+items.slice(0,5).map(renderItem).join("")+'</ul>'
+    : "";
+  const taskItem = item => '<li>'+esc(item.name)+' · '+esc(format(item.date))+'</li>';
+  const systemItem = item => '<li>'+esc(item.name)+' <button type="button" class="secondary" data-assess="'+esc(item.id)+'">Apri screening</button></li>';
+  const reviewItem = item => '<li>'+esc(item.name)+' · '+esc(format(item.date))+' <button type="button" class="secondary" data-assess="'+esc(item.id)+'">Apri riesame</button></li>';
+  return '<div class="card"><h2>Priorità operative</h2><p class="muted">Promemoria basati sui dati registrati e sulle scadenze interne, non un attestato di conformità.</p>'+
+    (p.prohibited.length ? '<h3>Possibili pratiche vietate: '+p.prohibited.length+'</h3><p>Verifica subito le condizioni del divieto e le eventuali eccezioni.</p>'+list(p.prohibited,systemItem) : "")+
+    '<h3>Screening da effettuare: '+p.screenings.length+'</h3>'+list(p.screenings,systemItem)+
+    '<h3>Attività scadute: '+p.overdue.length+'</h3>'+list(p.overdue,taskItem)+
+    '<h3>Attività in scadenza nei prossimi 30 giorni: '+p.upcoming.length+'</h3>'+list(p.upcoming,taskItem)+
+    '<h3>Riesami scaduti o entro 30 giorni: '+p.reviews.length+'</h3>'+list(p.reviews,reviewItem)+
+    (p.prohibited.length+p.screenings.length+p.overdue.length+p.upcoming.length+p.reviews.length===0 ? '<p class="muted">Nessuna priorità rilevata nei dati disponibili. Continua a verificare il registro e gli obblighi applicabili.</p>' : "")+
+    '<div class="toolbar"><button data-go="systems">Apri registro</button> <button class="secondary" data-go="tasks">Gestisci attività</button></div></div>';
+}
+
 function renderCore() {
   $("crumb").textContent = titles[page];
   document
@@ -95,7 +115,7 @@ function renderCore() {
       (state.tasks.length - done) +
       '</div></div><div class="card">Attività completate<div class="metric">' +
       done +
-      '</div></div></div><div class="card"><h2>Prossimi passi</h2><p>Registra i sistemi AI, documenta le finalità e verifica i requisiti applicabili.</p><button data-go="systems">Apri registro</button> <button class="secondary" data-go="tasks">Gestisci attività</button></div>';
+      '</div></div></div>' + dashboardPriorities() + '';
   } else if (page === "systems" || page === "tasks") {
     h +=
       '<p class="muted">' +
@@ -128,6 +148,7 @@ function renderCore() {
     };
     bindRows();
   }
+  if (page === "dashboard") document.querySelectorAll("[data-assess]").forEach(button => { button.onclick = () => go("risk", button.dataset.assess); });
   if (page === "risk") bindAssessment();
 }
 function bindRows() {
@@ -474,6 +495,7 @@ function renderExtra() {
   if ($("extraform")) {
     $("extraform").onsubmit = (e) => {
       e.preventDefault();
+      if (managed && current.role === "viewer") return;
       const previous = state[page] || [];
       state[page] = [...previous, Object.fromEntries(new FormData(e.target))];
       if (!save()) {
@@ -485,6 +507,7 @@ function renderExtra() {
     document.querySelectorAll("[data-remove]").forEach(
       (b) =>
         (b.onclick = () => {
+          if (managed && current.role === "viewer") return;
           if (!confirm("Eliminare questo elemento?")) return;
           const previous = state[page];
           state[page] = previous.filter(
@@ -1735,6 +1758,7 @@ function render() {
       "[data-delete]",
       "[data-consult-edit]",
       "[data-consult-delete]",
+      "[data-remove]",
       "#extraform",
       "#consultForm",
       "#savePolicy",
