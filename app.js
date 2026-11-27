@@ -977,7 +977,7 @@ function exportPDF(k, draft) {
   w.document.write(
     '<!doctype html><html lang="it"><meta charset="utf-8"><title>' +
       esc(g?.[0] || "Bozza policy IA") +
-      "</title><style>body{font:14px system-ui;padding:24px;color:#18263b}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccd4df;padding:10px;text-align:left;overflow-wrap:anywhere}tr{break-inside:avoid}thead{display:table-header-group}@page{margin:15mm}</style><h1>" +
+      "</title><style>body{font:14px system-ui;padding:24px;color:#30264C}table{border-collapse:collapse;width:100%}td,th{border:1px solid #E5DDF5;padding:10px;text-align:left;overflow-wrap:anywhere}tr{break-inside:avoid}thead{display:table-header-group}@page{margin:15mm}</style><h1>" +
       esc(g?.[0] || "Bozza policy interna IA") +
       "</h1><p>" +
       esc(current.name) +
@@ -1089,7 +1089,7 @@ function openPolicyPreview(printNow = false) {
           )
           .join("");
   w.document.write(
-    '<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bozza di policy interna | AI ACT</title><style> *{box-sizing:border-box}body{margin:0;padding:12px 24px;font:15px system-ui;color:#18263b;background:#fff}main{max-width:1000px;margin:auto}button{font:inherit;cursor:pointer;border:0;border-radius:9px;padding:12px 16px;background:linear-gradient(115deg,#b9e6ff,#c7b7fa);color:#18263b}h1{font-size:30px;margin:10px 0 18px}h2{font-size:17px;margin:0 0 16px}p{line-height:1.6}header{border-bottom:1px solid #dbe3ef;padding:14px 0 24px}section{padding:28px 0;border-bottom:1px solid #dbe3ef;break-inside:avoid}.draft{margin:18px 0;font-weight:700}@media print{button{display:none}body{padding:0}@page{margin:15mm}}</style></head><body><main><button id="printPolicy">Stampa o salva come PDF</button><header><strong>AI ACT</strong><h1>Bozza di policy interna</h1><div>' +
+    '<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bozza di policy interna | AI ACT</title><style> *{box-sizing:border-box}body{margin:0;padding:12px 24px;font:15px system-ui;color:#30264C;background:#fff}main{max-width:1000px;margin:auto}button{font:inherit;cursor:pointer;border:0;border-radius:9px;padding:12px 16px;background:linear-gradient(115deg,#E4EFFF,#D9C9F8);color:#30264C}h1{font-size:30px;margin:10px 0 18px}h2{font-size:17px;margin:0 0 16px}p{line-height:1.6}header{border-bottom:1px solid #E4EFFF;padding:14px 0 24px}section{padding:28px 0;border-bottom:1px solid #E4EFFF;break-inside:avoid}.draft{margin:18px 0;font-weight:700}@media print{button{display:none}body{padding:0}@page{margin:15mm}}</style></head><body><main><button id="printPolicy">Stampa o salva come PDF</button><header><strong>AI ACT</strong><h1>Bozza di policy interna</h1><div>' +
       esc(current.name) +
       (current.kind ? " · " + esc(current.kind) : "") +
       " · " +
