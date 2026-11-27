@@ -981,7 +981,7 @@ function renderDocuments() {
     card("training") +
     '<article class="card doc-card">' +
     icon +
-    '<h2>Policy interna sull’uso dell’IA</h2><p class="muted">Modello modificabile per strumenti, dati, verifiche e segnalazioni.</p><div class="doc-actions"><button id="preparePolicy" class="secondary">Prepara bozza</button><button id="exportPolicy" class="secondary">↓ Esporta bozza PDF</button></div></article></div><p id="docNotice" role="status"></p><div id="policyArea" hidden class="card"><h2>Bozza modificabile</h2><textarea id="policyText" rows="17" aria-label="Testo della policy"></textarea><div class="doc-actions"><button id="savePolicy">Salva bozza</button><button class="secondary" id="closePolicy">Chiudi</button></div></div><article class="card doc-sources"><h2>Fonti normative</h2><p class="muted">Verifica la versione applicabile alla data della valutazione.</p><ul><li><a target="_blank" rel="noopener" href="https://eur-lex.europa.eu/eli/reg/2024/1689/oj?locale=it">Regolamento (UE) 2024/1689 · Gazzetta ufficiale</a></li><li><a target="_blank" rel="noopener" href="https://eur-lex.europa.eu/legal-content/IT/TXT/?uri=CELEX:32024R1689">EUR-Lex · Testo e informazioni sulle modifiche</a></li></ul></article>';
+    '<h2>Policy interna sull’uso dell’IA</h2><p class="muted">Modello modificabile per strumenti, dati, verifiche e segnalazioni.</p><div class="doc-actions"><button id="preparePolicy" class="secondary">Prepara bozza</button><button id="exportPolicy" class="secondary">↓ Esporta bozza PDF</button></div></article></div><p id="docNotice" role="status"></p><div id="policyArea" hidden class="card"><h2>Bozza modificabile</h2><textarea id="policyText" rows="17" aria-label="Testo della policy"></textarea><div class="doc-actions"><button id="savePolicy">Salva bozza</button><button class="secondary" id="closePolicy">Chiudi</button></div></div><article class="card doc-sources"><h2>Fonti normative</h2><p class="muted">Verifica la versione applicabile alla data della valutazione.</p><div class="source-grid"><a class="source-card" target="_blank" rel="noopener noreferrer" href="https://eur-lex.europa.eu/eli/reg/2024/1689/oj?locale=it"><div class="source-art eu-art" aria-hidden="true">✦ EU ✦</div><div class="source-body"><small>GAZZETTA UFFICIALE UE</small><h3>Regolamento (UE) 2024/1689</h3><p>Il testo ufficiale dell’AI Act.</p><strong>Consulta il regolamento →</strong></div></a><a class="source-card" target="_blank" rel="noopener noreferrer" href="https://eur-lex.europa.eu/legal-content/IT/TXT/?uri=CELEX:32024R1689"><div class="source-art law-art" aria-hidden="true">§</div><div class="source-body"><small>EUR-LEX</small><h3>Testo e modifiche</h3><p>Consulta le informazioni legislative e le versioni disponibili.</p><strong>Apri EUR-Lex →</strong></div></a><a class="source-card" target="_blank" rel="noopener noreferrer" href="https://digital-strategy.ec.europa.eu/it/policies/regulatory-framework-ai"><div class="source-art guide-art" aria-hidden="true">◎</div><div class="source-body"><small>COMMISSIONE EUROPEA</small><h3>Guida all’AI Act</h3><p>Informazioni sull’applicazione del regolamento.</p><strong>Consulta la guida →</strong></div></a></div></article>';
   document
     .querySelectorAll("[data-csv]")
     .forEach((b) => (b.onclick = () => exportCSV(b.dataset.csv)));
@@ -1121,13 +1121,7 @@ function guideDashboard() {
         ([n, t, d, p]) =>
           '<button type="button" class="launch-step" data-step="' +
           p +
-          '"><strong>' +
-          n +
-          ". " +
-          t +
-          "</strong><span>" +
-          d +
-          "</span></button>",
+          '"><span class="step-top"><span class="step-icon" aria-hidden="true">' + ["▤","⌘","✓","☷","◇","▧"][Number(n)-1] + '</span><span class="step-number">PASSO ' + n + ' / 6</span></span><strong>' + t + '</strong><span class="step-description">' + d + '</span><span class="step-link">Apri sezione →</span></button>',
       )
       .join("") +
     '</div><p class="muted">Guida orientativa: la compilazione non certifica la conformità. <a href="https://eur-lex.europa.eu/eli/reg/2024/1689/oj?locale=it" target="_blank" rel="noopener noreferrer">Consulta il regolamento ufficiale</a>.</p>';
@@ -1491,15 +1485,13 @@ function downloadWorkspace() {
 }
 
 function renderSettings() {
-  $("content").innerHTML = `<h1>Dati e account</h1><section class="card">
-    <h2>Protezione dei dati</h2>
-    <p>In modalità locale i dati restano nel browser. Esportali prima di cambiare dispositivo o cancellare i dati del sito. Il file esportato può contenere dati riservati.</p>
-    <p>Con un account il server conserva il workspace, l’indirizzo email e la sessione. Solo gli utenti autorizzati possono accedere al workspace. Il Copilota generativo, se configurato, invia al fornitore solo la domanda scelta dall’utente.</p>
-    <div class="account-controls">
-      ${current?.id ? '<button id="exportWorkspace" class="secondary">Esporta workspace JSON</button>' : ""}
-      ${managed ? '<button id="logout" class="secondary">Esci</button>' : ""}
-    </div>
-    </section><section id="accountPanel" class="card"></section>`;
+  $("content").innerHTML = `<h1>Dati e account</h1><p class="muted">Gestisci il tuo spazio di lavoro, gli accessi e la conservazione dei dati.</p><div class="settings-grid">
+  <article class="card settings-card"><span class="step-icon" aria-hidden="true">▤</span><h2>La tua organizzazione</h2><p><strong>${esc(current.name)}</strong></p><p class="muted">Consulta e aggiorna i dati aziendali e i referenti.</p><button id="settingsProfile">Gestisci organizzazione</button></article>
+  <article class="card settings-card"><span class="step-icon" aria-hidden="true">◎</span><h2>Salvataggio dei dati</h2><p><strong>${managed ? "Archivio sul server" : "Archivio locale nel browser"}</strong></p><p class="muted">${managed ? "Usa Salva modifiche sul server per sincronizzare il workspace." : "I dati sono salvati su questo dispositivo. Conserva una copia prima di cancellare i dati del sito."}</p><span class="pill">${managed ? (dirty ? "Modifiche da salvare" : "Nessuna modifica in attesa") : "Modalità locale"}</span></article>
+  <article class="card settings-card"><span class="step-icon" aria-hidden="true">◇</span><h2>Riservatezza e accessi</h2><p class="muted">Gli account sul server consentono di gestire gli accessi autorizzati. Evita dati riservati nelle domande al Copilota.</p><button id="settingsAccess" class="secondary">Gestisci accesso</button></article></div>
+  <section id="accountPanel" class="card settings-panel"></section><details class="card technical-tools"><summary>Strumenti avanzati · trasferimento e copie dei dati</summary><p class="muted">Usa questa funzione solo per trasferire il workspace o conservarne una copia. Il file può contenere informazioni riservate.</p>${current?.id ? '<button id="exportWorkspace" class="secondary">Scarica copia dei dati</button>' : ""}</details>${managed ? '<button id="logout" class="secondary">Esci dall’account</button>' : ""}`;
+  $("settingsProfile").onclick = () => go("profile");
+  $("settingsAccess").onclick = () => $("accountPanel").scrollIntoView({behavior:"smooth",block:"start"});
   if ($("exportWorkspace")) $("exportWorkspace").onclick = downloadWorkspace;
   if ($("logout"))
     $("logout").onclick = async () => {
@@ -1514,8 +1506,7 @@ function renderSettings() {
     };
   const panel = $("accountPanel");
   if (!endpointAvailable) {
-    panel.textContent =
-      "Accesso con account disponibile sul server del progetto. Questa pubblicazione funziona in modalità locale.";
+    panel.innerHTML = '<h2>Accesso e collaborazione</h2><p>Stai utilizzando la versione locale. L’accesso personale, la collaborazione e il salvataggio centralizzato richiedono la versione server.</p><p class="muted">Non è necessario creare un account per esplorare questa versione.</p>';
     return;
   }
   if (!managed) {
