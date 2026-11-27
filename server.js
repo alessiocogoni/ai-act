@@ -44,6 +44,8 @@ const files = new Map(
   [
     ["/", ["index.html", "text/html; charset=utf-8"]],
     ["/index.html", ["index.html", "text/html; charset=utf-8"]],
+    ["/legal.html", ["legal.html", "text/html; charset=utf-8"]],
+    ["/favicon.svg", ["favicon.svg", "image/svg+xml"]],
     ["/app.js", ["app.js", "text/javascript; charset=utf-8"]],
     ["/risk.js", ["risk.js", "text/javascript; charset=utf-8"]],
     ["/workspace.css", ["workspace.css", "text/css; charset=utf-8"]],
