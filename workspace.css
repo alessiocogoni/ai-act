@@ -168,3 +168,5 @@ main,#content{background:transparent!important}
 #content > .cards,#content > .doc-grid,#content > .settings-grid{margin-top:16px;margin-bottom:16px}
 #content .launch-grid,#content .source-grid{margin-top:16px;margin-bottom:16px}
 @media(max-width:760px){#content{padding-top:14px;padding-bottom:18px}#content > h1:first-child{margin-bottom:12px}}
+
+.guide-suggestions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 14px}.guide-suggestions button{font-size:12px;padding:8px 11px;text-align:left;white-space:normal;max-width:100%}.guide-sources{display:flex;flex-wrap:wrap;gap:6px 12px;margin:6px 0 12px;font-size:12px}.messages .bubble{white-space:pre-wrap;overflow-wrap:anywhere}.messages .guide-suggestions{display:grid;grid-template-columns:minmax(0,1fr)}
