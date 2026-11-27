@@ -1,4 +1,4 @@
-import { assess, assessmentChecks, localCopilot, sources, workspacePriorities } from "./risk.js?v=operational-priorities";
+import { assess, assessmentChecks, localCopilot, sources, workspacePriorities } from "./risk.js?v=guide-v2";
 
 const $ = (id) => document.getElementById(id),
   esc = (v) =>
@@ -14,6 +14,8 @@ const $ = (id) => document.getElementById(id),
         })[c],
     );
 let state;
+let guideContext = { org: "", topic: "" };
+let guideBusy = false;
 let managed = false;
 let dirty = false;
 let page = "dashboard",
@@ -435,7 +437,7 @@ function renderExtra() {
     h +=
       '<p class="muted">' +
       esc(current.name) +
-      '</p><div class="card"><h2>Da quale uso dell’IA vuoi partire?</h2><p>Descrivimi un’attività in cui usate l’intelligenza artificiale. Usa il registro per creare una scheda e il piano per annotare le verifiche necessarie.</p><div class="cards"><button data-start="census">Censisci un uso dell’IA<br>Parti da uno strumento e da un’attività.</button><button data-start="hr">Gestionale HR<br>Valuta l’uso dell’IA sui CV.</button><button data-start="plan">Rivedi il piano<br>Controlla le azioni aperte.</button></div><form id="homechat"><input name="message" maxlength="1500" aria-label="Domanda per il Copilota" placeholder="Es. Usiamo IA per rispondere ai clienti" required style="width:75%"><button>Invia</button></form></div>';
+      '</p><div class="card"><h2>Da quale uso dell’IA vuoi partire?</h2><p>Descrivimi un’attività in cui usate l’intelligenza artificiale. Usa il registro per creare una scheda e il piano per annotare le verifiche necessarie.</p><div class="cards"><button data-start="census">Censisci un uso dell’IA<br>Parti da uno strumento e da un’attività.</button><button data-start="hr">Gestionale HR<br>Valuta l’uso dell’IA sui CV.</button><button data-start="plan">Rivedi il piano<br>Controlla le azioni aperte.</button></div><p class="muted">Domande sul regolamento, sui rischi e sugli obblighi. La guida locale usa contenuti curati, non un modello generativo.</p><div class="guide-suggestions"><button type="button" class="secondary" data-guide-question="Cos’è l’AI Act?">Cos’è l’AI Act?</button><button type="button" class="secondary" data-guide-question="Qual è il mio ruolo?">Qual è il mio ruolo?</button><button type="button" class="secondary" data-guide-question="Quali sono i sistemi ad alto rischio?">Alto rischio</button><button type="button" class="secondary" data-guide-question="Come organizzo la formazione?">Formazione</button></div><form id="homechat"><input name="message" maxlength="1500" aria-label="Domanda per il Copilota" placeholder="Es. Usiamo IA per rispondere ai clienti" required style="width:75%"><button>Invia</button></form></div>';
   } else if (page === "profile") {
     h +=
       '<div class="card"><h2>Profilo e visura</h2><p class="muted">Identifica l’organizzazione e il referente per la gestione della compliance IA.</p><form id="profileform"><label>Ragione sociale<input name="name" placeholder="Es. Rossi Srl" required value="' +
@@ -617,12 +619,14 @@ function renderExtra() {
         $("chat").hidden = false;
       }),
   );
+  document.querySelectorAll("#content [data-guide-question]").forEach(button => button.onclick = () => askGuide(button.dataset.guideQuestion));
   if ($("homechat"))
     $("homechat").onsubmit = (e) => {
       e.preventDefault();
-      $("question").value = new FormData(e.target).get("message");
-      $("chat").hidden = false;
-      $("chatForm").requestSubmit();
+      const question = new FormData(e.target).get("message");
+      if (guideBusy) return;
+      e.target.reset();
+      askGuide(question);
     };
 }
 syncOrg();
@@ -1792,47 +1796,88 @@ function render() {
     $("enableAI").hidden = !(managed && credentials?.aiEnabled && current.id);
 }
 
+function askGuide(question) {
+  if (guideBusy) return;
+  $("question").value = question;
+  $("chat").hidden = false;
+  $("chatForm").requestSubmit();
+}
 $("chatForm").onsubmit = async (event) => {
   event.preventDefault();
-  const input = $("question");
-  const question = input.value.trim();
+  if (guideBusy) return;
+  const input = $("question"), question = input.value.trim();
   if (!question) return;
   const id = current.id;
+  if (guideContext.org !== id) guideContext = {org:id,topic:""};
   input.value = "";
+  $("chat").hidden = false;
+  const messages = $("messages");
   const add = (value, className) => {
     const node = document.createElement("div");
     node.className = className;
     node.textContent = value;
-    $("messages").append(node);
-    $("messages").scrollTop = $("messages").scrollHeight;
+    messages.append(node);
+    messages.scrollTop = messages.scrollHeight;
+    return node;
+  };
+  const button = (label, handler) => {
+    const node = document.createElement("button");
+    node.type = "button";
+    node.className = "secondary";
+    node.textContent = label;
+    node.onclick = handler;
+    return node;
+  };
+  const references = items => {
+    if (!items?.length) return;
+    const links = document.createElement("div");
+    links.className = "guide-sources";
+    for (const [label,url] of items) {
+      const link = document.createElement("a");
+      link.href = url;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = label;
+      links.append(link);
+    }
+    messages.append(links);
   };
   add(question, "bubble mine");
-  $("chatMode").textContent = managed && credentials?.aiEnabled && $("aiConsent").checked ? "Copilota generativo" : "Guida AI Act · risposte a regole";
-  if (!managed || !id || !credentials?.aiEnabled || !$("aiConsent").checked) {
-    const reply = localCopilot(question, state);
+  const generative = Boolean(managed && id && credentials?.aiEnabled && $("aiConsent").checked);
+  $("chatMode").textContent = generative ? "Copilota generativo" : "Guida AI Act · guida locale";
+  if (!generative) {
+    const reply = localCopilot(question, state, guideContext.topic);
+    guideContext = {org:id,topic:reply.topic};
     add(reply.text, "bubble");
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "secondary";
-    button.textContent = reply.action;
-    button.onclick = () => {
+    messages.append(button(reply.action, () => {
       $("chat").hidden = true;
       go(reply.page);
-    };
-    $("messages").append(button);
-    $("messages").scrollTop = $("messages").scrollHeight;
+    }));
+    references(reply.references);
+    if (reply.suggestions?.length) {
+      const options = document.createElement("div");
+      options.className = "guide-suggestions";
+      reply.suggestions.forEach(text => options.append(button(text, () => askGuide(text))));
+      messages.append(options);
+    }
+    messages.scrollTop = messages.scrollHeight;
     return;
   }
+  guideBusy = true;
+  const submit = $("chatForm").querySelector("button");
+  submit.disabled = true;
+  const pending = add("Sto elaborando la domanda…", "bubble");
   try {
     const result = await api("orgs/" + id + "/copilot", "POST", { question });
     if (!managed || current.id !== id) return;
-    add(result.answer, "bubble");
-    const link = document.createElement("a");
-    link.href = sources.guidance;
-    link.textContent = "Fonti ufficiali UE";
-    $("messages").append(link);
+    pending.textContent = result.answer;
+    references([["Fonti ufficiali UE",sources.guidance]]);
   } catch (error) {
-    if (current.id === id) add(error.message, "bubble");
+    if (current.id === id) pending.textContent = "Copilota non disponibile: " + error.message + " Puoi disattivare il Copilota generativo e usare la guida locale.";
+  } finally {
+    guideBusy = false;
+    submit.disabled = false;
+    messages.scrollTop = messages.scrollHeight;
   }
 };
 
