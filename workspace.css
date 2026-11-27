@@ -142,3 +142,5 @@ aside nav details>button[data-page]{margin:4px 0;padding:11px 10px 11px 18px;bor
 aside nav details>button[data-page].active,aside nav details>button[data-page]:hover{background:linear-gradient(120deg,#d8f0ff,#e0d4ff);color:#392b72}
 
 #orgSelect{display:block;width:100%;appearance:none;padding:14px 10px;border:1px solid #d8cef4;border-radius:14px;background:linear-gradient(135deg,#f0faff,#eee6ff);color:#292442;font-weight:650;font-size:13px;cursor:pointer}#orgSelect option{background:white;color:#292442}.workspace-choices{display:grid;gap:12px;margin-top:24px}.workspace-choices button{text-align:left;padding:16px;border-radius:12px;background:linear-gradient(120deg,#e3f5ff,#e7dcff);color:#292442}
+
+#orgSelect[hidden]{display:none!important}
