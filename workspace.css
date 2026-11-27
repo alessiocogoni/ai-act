@@ -107,3 +107,12 @@ header{background:rgba(255,255,255,.68);backdrop-filter:blur(14px);border-bottom
 .card{background:#fff;border-color:#e2ddf1;box-shadow:0 8px 28px #51418a0c}
 aside .brand svg{flex-shrink:0;width:40px;height:40px}
 @media print{html,body,main,#content{background:#fff!important}.card{box-shadow:none}}
+
+/* Premium organization switcher */
+.org-picker{position:relative;min-width:0;width:100%;z-index:12;margin-top:5px}
+.org-picker button{font:inherit;text-align:left;box-shadow:none}
+.org-picker .org-picker-trigger{width:100%;display:flex;align-items:center;gap:10px;padding:12px 9px;background:linear-gradient(135deg,#f0faff,#eee6ff);border:1px solid #d8cef4;border-radius:16px;color:#252943;box-shadow:0 5px 18px #6651a914}
+.org-avatar{display:grid;place-items:center;flex:0 0 36px;height:36px;border-radius:12px;background:linear-gradient(135deg,#a6e1ff,#bca3f4);color:#392b72;font-size:12px;font-weight:800;letter-spacing:.02em}
+.org-picker-copy{display:grid;gap:3px;min-width:0;flex:1}.org-picker-copy small{font-size:8px!important;letter-spacing:.1em;color:#6651a9;font-weight:800}.org-picker-copy strong{font-size:12px;line-height:1.35;overflow-wrap:anywhere}.org-chevron{font-size:20px;color:#6651a9;transition:transform .2s}.org-picker-trigger[aria-expanded=true] .org-chevron{transform:rotate(180deg)}
+.org-picker-menu{position:absolute;top:calc(100% + 8px);left:0;right:0;background:#fff;border:1px solid #ded5f4;border-radius:16px;padding:8px;box-shadow:0 14px 36px #51418a26;z-index:20}.org-menu-title{padding:7px 8px 10px;font-size:10px;font-weight:750;color:#6651a9;text-transform:uppercase;letter-spacing:.06em}.org-menu-items{display:grid;gap:5px;max-height: min(320px,40vh);overflow:auto;scrollbar-width:thin;scrollbar-color:#c7b7fa transparent}
+.org-picker .org-option{display:flex;align-items:center;gap:8px;width:100%;padding:8px;background:white;border:1px solid transparent;border-radius:11px;color:#252943}.org-option .org-avatar{flex-basis:29px;height:29px;border-radius:9px;font-size:10px}.org-option-name{flex:1;min-width:0;overflow-wrap:anywhere;font-size:12px;font-weight:600}.org-picker .org-option.selected,.org-picker .org-option:hover{background:linear-gradient(135deg,#eef9ff,#f1eaff);border-color:#e3daf7}.org-check{color:#6651a9;font-weight:800}.org-picker .org-add{display:flex;align-items:center;gap:5px;width:100%;margin-top:8px;padding:10px 7px;background:linear-gradient(115deg,#b9e6ff,#c7b7fa);color:#392b72;font-size:11px;font-weight:750;border-radius:10px}.org-add span{font-size:17px}
