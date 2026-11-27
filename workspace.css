@@ -157,3 +157,6 @@ main,#content{background:transparent!important}
 #content > h1:first-child{display:block;width:100%;margin:0 0 18px;padding:0;text-align:left;font-size:clamp(1.75rem,2.7vw,2.35rem);line-height:1.2;font-weight:750;letter-spacing:-.035em;overflow-wrap:anywhere}
 #content > h1:first-child + p{margin-top:0;text-align:left}
 @media(max-width:760px){#content > h1:first-child{font-size:1.75rem;margin-bottom:14px}}
+
+/* Discreet legal links outside the dynamic workspace. */
+.site-legal-footer{max-width:1320px;width:100%;padding:16px clamp(20px,3.3vw,48px) 26px;text-align:center;color:#6D6582;font-size:12px}.site-legal-footer nav{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 20px;border-top:1px solid #D9C9F8;padding:16px 0 6px;margin:0}.site-legal-footer a{color:#66509E;text-decoration:none;font-weight:600}.site-legal-footer a:hover,.site-legal-footer a:focus-visible{text-decoration:underline}.site-legal-footer p{margin:6px 0 0}@media print{.site-legal-footer{display:none!important}}
