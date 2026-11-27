@@ -116,3 +116,14 @@ aside .brand svg{flex-shrink:0;width:40px;height:40px}
 .org-picker-copy{display:grid;gap:3px;min-width:0;flex:1}.org-picker-copy small{font-size:8px!important;letter-spacing:.1em;color:#6651a9;font-weight:800}.org-picker-copy strong{font-size:12px;line-height:1.35;overflow-wrap:anywhere}.org-chevron{font-size:20px;color:#6651a9;transition:transform .2s}.org-picker-trigger[aria-expanded=true] .org-chevron{transform:rotate(180deg)}
 .org-picker-menu{position:absolute;top:calc(100% + 8px);left:0;right:0;background:#fff;border:1px solid #ded5f4;border-radius:16px;padding:8px;box-shadow:0 14px 36px #51418a26;z-index:20}.org-menu-title{padding:7px 8px 10px;font-size:10px;font-weight:750;color:#6651a9;text-transform:uppercase;letter-spacing:.06em}.org-menu-items{display:grid;gap:5px;max-height: min(320px,40vh);overflow:auto;scrollbar-width:thin;scrollbar-color:#c7b7fa transparent}
 .org-picker .org-option{display:flex;align-items:center;gap:8px;width:100%;padding:8px;background:white;border:1px solid transparent;border-radius:11px;color:#252943}.org-option .org-avatar{flex-basis:29px;height:29px;border-radius:9px;font-size:10px}.org-option-name{flex:1;min-width:0;overflow-wrap:anywhere;font-size:12px;font-weight:600}.org-picker .org-option.selected,.org-picker .org-option:hover{background:linear-gradient(135deg,#eef9ff,#f1eaff);border-color:#e3daf7}.org-check{color:#6651a9;font-weight:800}.org-picker .org-add{display:flex;align-items:center;gap:5px;width:100%;margin-top:8px;padding:10px 7px;background:linear-gradient(115deg,#b9e6ff,#c7b7fa);color:#392b72;font-size:11px;font-weight:750;border-radius:10px}.org-add span{font-size:17px}
+
+/* Workspace identity in the top bar */
+header .header-workspace{margin-left:auto;display:flex;align-items:center;gap:11px;min-width:0;max-width:min(460px,100%);padding:8px 16px 8px 9px;border:1px solid #dcd3f5;border-radius:16px;background:linear-gradient(120deg,#f1faff,#eee6ff);box-shadow:0 4px 16px #51418a0c}
+.header-workspace .header-org-icon{display:grid;place-items:center;flex:0 0 38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#b9e6ff,#c7b7fa);color:#51418a}
+.header-org-icon svg{width:21px;height:21px}
+.header-workspace .header-org-copy{display:grid;gap:3px;min-width:0}
+header .header-workspace span{margin:0}
+#orgHeaderLabel{font-size:9px;font-weight:750;letter-spacing:.11em;color:#6651a9;line-height:1.2}
+#orgHeader{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;font-weight:700;letter-spacing:-.025em;color:#292442;line-height:1.35;overflow-wrap:anywhere}
+.header-workspace.is-empty #orgHeader{font-weight:550;color:#68728a}
+@media(max-width:760px){header .header-workspace{padding:6px 10px;max-width:100%;gap:8px}#orgHeader{font-size:12px}.header-workspace .header-org-icon{flex-basis:32px;height:32px}}
