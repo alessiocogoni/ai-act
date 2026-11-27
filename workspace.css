@@ -127,3 +127,16 @@ header .header-workspace span{margin:0}
 #orgHeader{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;font-weight:700;letter-spacing:-.025em;color:#292442;line-height:1.35;overflow-wrap:anywhere}
 .header-workspace.is-empty #orgHeader{font-weight:550;color:#68728a}
 @media(max-width:760px){header .header-workspace{padding:6px 10px;max-width:100%;gap:8px}#orgHeader{font-size:12px}.header-workspace .header-org-icon{flex-basis:32px;height:32px}}
+
+/* Premium expandable workspace navigation */
+aside nav details{margin:8px 0;border-radius:15px}
+aside nav details>summary{display:flex;align-items:center;gap:9px;list-style:none;padding:12px 10px;border:1px solid transparent;border-radius:13px;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:13px;font-weight:700;letter-spacing:-.02em;color:#292442;transition:background .18s,border-color .18s}
+aside nav details>summary::-webkit-details-marker{display:none}
+aside nav details>summary::marker{content:""}
+aside nav details>summary::before{content:"";width:29px;height:29px;flex:0 0 29px;border-radius:9px;background:linear-gradient(135deg,#b9e6ff,#c7b7fa)}
+aside nav details>summary::after{content:"";width:7px;height:7px;border-right:1.8px solid #6651a9;border-bottom:1.8px solid #6651a9;transform:rotate(45deg);margin-left:auto;margin-right:3px;transition:transform .18s}
+aside nav details[open]>summary::after{transform:rotate(225deg)}
+aside nav details[open]{background:rgba(255,255,255,.78);border:1px solid #e2d9f6;padding:4px;box-shadow:0 7px 22px #51418a0d}
+aside nav details[open]>summary,aside nav details>summary:hover{background:linear-gradient(120deg,#e3f5ff,#e7dcff);border-color:#dcd3f5;color:#292442}
+aside nav details>button[data-page]{margin:4px 0;padding:11px 10px 11px 18px;border-radius:10px;font-size:12px;font-weight:600;color:#454c68}
+aside nav details>button[data-page].active,aside nav details>button[data-page]:hover{background:linear-gradient(120deg,#d8f0ff,#e0d4ff);color:#392b72}
