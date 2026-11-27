@@ -1,4 +1,4 @@
-import { assess, assessmentChecks, localCopilot, sources, workspacePriorities } from "./risk.js?v=guide-v2";
+import { assess, assessmentChecks, localCopilot, sources, workspacePriorities } from "./risk.js?v=guide-v3";
 
 const $ = (id) => document.getElementById(id),
   esc = (v) =>
