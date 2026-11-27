@@ -330,7 +330,7 @@ function syncOrg() {
 $("orgSelect").onchange = () => {
   if (!$("orgSelect").value) return;
   if (managed) {
-    switchManaged($("orgSelect").value);
+    switchManaged($("orgSelect").value, page === "settings" ? "dashboard" : page);
     return;
   }
   if ($("orgSelect").value === "new") {
@@ -338,12 +338,17 @@ $("orgSelect").onchange = () => {
     $("orgForm").reset();
     $("orgDialog").showModal();
     return;
-  } else current = orgs.find((o) => o.id === $("orgSelect").value);
+  } else {
+    const next = orgs.find((o) => o.id === $("orgSelect").value);
+    if (!next) { syncOrg(); return; }
+    current = next;
+    prepareWorkspace(current);
+  }
   state = current.data;
   $("messages").innerHTML =
     '<div class="bubble">Workspace cambiato. Come posso aiutarti?</div>';
   syncOrg();
-  go("dashboard");
+  go(page === "settings" ? "dashboard" : page);
 };
 $("orgClose").onclick = $("orgCancel").onclick = () => $("orgDialog").close();
 $("orgForm").onsubmit = (e) => {
@@ -1644,10 +1649,8 @@ async function runForm(form, action) {
 
 function render() {
   if (!current.id && page !== "settings") {
-    $("content").innerHTML = '<div class="card" style="max-width:720px;margin:8vh auto;padding:36px"><h1>Benvenuto in AI ACT</h1><p class="muted">Scegli un’organizzazione per accedere al suo spazio di lavoro oppure creane una nuova.</p><button id="chooseWorkspace">Seleziona organizzazione</button></div>';
-    const choose = $("chooseWorkspace");
-    const list = document.createElement("div");
-    list.className = "workspace-choices";
+    const section = titles[page] || "Dashboard";
+    $("content").innerHTML = '<h1>'+esc(section)+'</h1><div class="card" style="max-width:720px;margin:24px auto;padding:30px"><h2>Seleziona un’organizzazione</h2><p class="muted">Per aprire '+esc(section)+' scegli lo spazio di lavoro. Nessuna organizzazione viene selezionata automaticamente.</p><div id="workspaceChoices" class="workspace-choices"></div></div>';
     for (const option of $("orgSelect").options) {
       if (!option.value) continue;
       const button = document.createElement("button");
@@ -1658,13 +1661,24 @@ function render() {
         $("orgSelect").value = option.value;
         $("orgSelect").onchange();
       };
-      list.append(button);
+      $("workspaceChoices").append(button);
     }
-    choose.replaceWith(list);
-    $("crumb").textContent = "Benvenuto";
+    if (managed && !orgs.length) {
+      const button = document.createElement("button");
+      button.textContent = "Gestisci organizzazioni";
+      button.onclick = () => go("settings");
+      $("workspaceChoices").append(button);
+    }
+    $("crumb").textContent = section;
     $("copilot").hidden = true;
     $("chat").hidden = true;
-    document.querySelectorAll("nav button[data-page]").forEach(b=>{b.classList.remove("active");b.removeAttribute("aria-current");});
+    document.querySelectorAll("nav button[data-page]").forEach(b=>{
+      const active = b.dataset.page === page;
+      b.classList.toggle("active",active);
+      if (active) { b.setAttribute("aria-current","page"); if(b.closest("details")) b.closest("details").open=true; }
+      else b.removeAttribute("aria-current");
+    });
+    if (page === "dashboard") guideDashboard();
     return;
   }
   $("copilot").hidden = !current.id;
