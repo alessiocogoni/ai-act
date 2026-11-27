@@ -1,4 +1,4 @@
-import { assess, assessmentChecks, localCopilot, sources, workspacePriorities } from "./risk.js?v=guide-v3";
+import { assess, assessmentChecks, localCopilot, sources, workspacePriorities } from "./risk.js?v=guide-reviewed-20261127";
 
 const $ = (id) => document.getElementById(id),
   esc = (v) =>
@@ -1854,6 +1854,7 @@ $("chatForm").onsubmit = async (event) => {
       go(reply.page);
     }));
     references(reply.references);
+    if (reply.reviewed) { const note = document.createElement("small"); note.className = "muted"; note.textContent = "Riferimenti della guida · revisione 27/11/2026"; messages.append(note); }
     if (reply.suggestions?.length) {
       const options = document.createElement("div");
       options.className = "guide-suggestions";
