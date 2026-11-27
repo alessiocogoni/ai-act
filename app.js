@@ -290,8 +290,7 @@ if (!Array.isArray(orgs) || !orgs.length)
           data: { systems: [], tasks: [] },
         },
       ];
-let current =
-  orgs.find((o) => o.id === localStorage.getItem("aio-current")) || orgs[0];
+let current = { id: "", name: "", data: { systems: [], tasks: [], consultations: [] } };
 for (const org of orgs) prepareWorkspace(org);
 state = current.data;
 for (const org of orgs) {
@@ -316,14 +315,14 @@ const persist = () => {
 };
 function syncOrg() {
   $("orgSelect").innerHTML =
-    orgs
+    '<option value="">Seleziona organizzazione</option>' + orgs
       .map(
         (o) => '<option value="' + esc(o.id) + '">' + esc(o.name) + "</option>",
       )
       .join("") +
     (managed ? "" : '<option value="new">Nuova organizzazione</option>');
   $("orgSelect").value = current.id;
-  $("orgHeader").textContent = current.name;
+  $("orgHeader").textContent = current.name || "Nessuna organizzazione selezionata";
   renderOrgPicker();
 }
 function renderOrgPicker() {
@@ -348,7 +347,7 @@ function renderOrgPicker() {
     picker.querySelector(".org-picker-trigger")?.setAttribute("aria-expanded", "false");
   }
   const initials = name => String(name || "Organizzazione").trim().split(/\s+/).slice(0,2).map(w=>w[0]||"").join("").toUpperCase();
-  picker.innerHTML = '<button type="button" class="org-picker-trigger" aria-expanded="false" aria-controls="orgPickerMenu"><span class="org-avatar">'+esc(initials(current.name))+'</span><span class="org-picker-copy"><small>SPAZIO DI LAVORO</small><strong>'+esc(current.name)+'</strong></span><span class="org-chevron" aria-hidden="true">⌄</span></button><div class="org-picker-menu" id="orgPickerMenu" hidden><div class="org-menu-title">Le tue organizzazioni</div><div class="org-menu-items">'+orgs.map(o=>'<button type="button" class="org-option'+(o.id===current.id?' selected':'')+'" data-org="'+esc(o.id)+'" '+(o.id===current.id?'aria-current="true"':'')+'><span class="org-avatar">'+esc(initials(o.name))+'</span><span class="org-option-name">'+esc(o.name)+'</span>'+(o.id===current.id?'<span class="org-check" aria-hidden="true">✓</span>':'')+'</button>').join("")+'</div>'+(!managed?'<button type="button" class="org-add" data-org="new"><span aria-hidden="true">＋</span> Nuova organizzazione</button>':'')+'</div>';
+  picker.innerHTML = '<button type="button" class="org-picker-trigger" aria-expanded="false" aria-controls="orgPickerMenu"><span class="org-avatar">'+esc(current.id ? initials(current.name) : "＋")+'</span><span class="org-picker-copy"><small>SPAZIO DI LAVORO</small><strong>'+esc(current.name || "Seleziona organizzazione")+'</strong></span><span class="org-chevron" aria-hidden="true">⌄</span></button><div class="org-picker-menu" id="orgPickerMenu" hidden><div class="org-menu-title">Le tue organizzazioni</div><div class="org-menu-items">'+orgs.map(o=>'<button type="button" class="org-option'+(o.id===current.id?' selected':'')+'" data-org="'+esc(o.id)+'" '+(o.id===current.id?'aria-current="true"':'')+'><span class="org-avatar">'+esc(initials(o.name))+'</span><span class="org-option-name">'+esc(o.name)+'</span>'+(o.id===current.id?'<span class="org-check" aria-hidden="true">✓</span>':'')+'</button>').join("")+'</div>'+(!managed?'<button type="button" class="org-add" data-org="new"><span aria-hidden="true">＋</span> Nuova organizzazione</button>':'')+'</div>';
   const trigger = picker.querySelector(".org-picker-trigger");
   const menu = picker.querySelector(".org-picker-menu");
   trigger.onclick = () => { menu.hidden = !menu.hidden; trigger.setAttribute("aria-expanded", String(!menu.hidden)); };
@@ -359,6 +358,7 @@ function renderOrgPicker() {
   });
 }
 $("orgSelect").onchange = () => {
+  if (!$("orgSelect").value) return;
   if (managed) {
     switchManaged($("orgSelect").value);
     return;
@@ -1474,9 +1474,7 @@ async function switchManaged(id, destination = "dashboard") {
 
 async function enterManaged() {
   const list = await api("orgs");
-  const next = list.length
-    ? await api("orgs/" + list[0].id)
-    : { id: "", name: "", data: { systems: [], tasks: [] } };
+  const next = { id: "", name: "", data: { systems: [], tasks: [] } };
   prepareWorkspace(next);
   managed = true;
   dirty = false;
@@ -1524,6 +1522,7 @@ function renderSettings() {
   <article class="card settings-card"><span class="step-icon" aria-hidden="true">◇</span><h2>Riservatezza e accessi</h2><p class="muted">Gli account sul server consentono di gestire gli accessi autorizzati. Evita dati riservati nelle domande al Copilota.</p><button id="settingsAccess" class="secondary">Gestisci accesso</button></article></div>
   <section id="accountPanel" class="card settings-panel"></section><details class="card technical-tools"><summary>Strumenti avanzati · trasferimento e copie dei dati</summary><p class="muted">Usa questa funzione solo per trasferire il workspace o conservarne una copia. Il file può contenere informazioni riservate.</p>${current?.id ? '<button id="exportWorkspace" class="secondary">Scarica copia dei dati</button>' : ""}</details>${managed ? '<button id="logout" class="secondary">Esci dall’account</button>' : ""}`;
   $("settingsProfile").onclick = () => go("profile");
+  if (!current.id) $("settingsProfile").disabled = true;
   $("settingsAccess").onclick = () => $("accountPanel").scrollIntoView({behavior:"smooth",block:"start"});
   if ($("exportWorkspace")) $("exportWorkspace").onclick = downloadWorkspace;
   if ($("logout"))
@@ -1674,7 +1673,16 @@ async function runForm(form, action) {
 }
 
 function render() {
-  if (managed && !current.id) page = "settings";
+  if (!current.id && page !== "settings") {
+    $("content").innerHTML = '<div class="card" style="max-width:720px;margin:8vh auto;padding:36px"><h1>Benvenuto in AI ACT</h1><p class="muted">Scegli un’organizzazione per accedere al suo spazio di lavoro oppure creane una nuova.</p><button id="chooseWorkspace">Seleziona organizzazione</button></div>';
+    $("chooseWorkspace").onclick = () => $("orgPicker")?.querySelector(".org-picker-trigger")?.click();
+    $("crumb").textContent = "Benvenuto";
+    $("copilot").hidden = true;
+    $("chat").hidden = true;
+    document.querySelectorAll("nav button[data-page]").forEach(b=>{b.classList.remove("active");b.removeAttribute("aria-current");});
+    return;
+  }
+  $("copilot").hidden = !current.id;
   if (page === "settings") renderSettings();
   else if (page === "docs") {
     renderDocuments();
