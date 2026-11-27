@@ -323,6 +323,8 @@ function syncOrg() {
     (managed ? "" : '<option value="new">Nuova organizzazione</option>');
   $("orgSelect").value = current.id;
   $("orgHeader").textContent = current.name || "Nessuna organizzazione selezionata";
+  $("orgHeader").closest(".header-workspace").classList.toggle("is-empty", !current.id);
+  $("orgHeaderLabel").textContent = current.id ? "ORGANIZZAZIONE ATTIVA" : "SPAZIO DI LAVORO";
   renderOrgPicker();
 }
 function renderOrgPicker() {
