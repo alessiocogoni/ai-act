@@ -33,16 +33,18 @@ const save = () => {
 const titles = {
   dashboard: "Dashboard",
   systems: "Registro sistemi AI",
-  risk: "Valutazione rischi",
+  risk: "Screening AI Act",
   tasks: "Attività e scadenze",
   settings: "Impostazioni",
 };
 function go(p, system = "") {
+  if (!Object.prototype.hasOwnProperty.call(titles, p)) return;
   assessmentSystem = system;
   page = p;
   filter = "";
   document.body.classList.remove("mobileopen");
   render();
+  window.scrollTo(0, 0);
 }
 document
   .querySelectorAll("[data-page]")
@@ -412,7 +414,7 @@ function renderExtra() {
     h +=
       '<p class="muted">' +
       esc(current.name) +
-      '</p><div class="card"><h1>Da quale uso dell’IA vuoi partire?</h1><p>Descrivimi un’attività in cui usate l’intelligenza artificiale. Usa il registro per creare una scheda e il piano per annotare le verifiche necessarie.</p><div class="cards"><button data-start="census">Censisci un uso dell’IA<br>Parti da uno strumento e da un’attività.</button><button data-start="hr">Gestionale HR<br>Valuta l’uso dell’IA sui CV.</button><button data-start="plan">Rivedi il piano<br>Controlla le azioni aperte.</button></div><form id="homechat"><input name="message" maxlength="1500" aria-label="Domanda per il Copilota" placeholder="Es. Usiamo IA per rispondere ai clienti" required style="width:75%"><button>Invia</button></form></div>';
+      '</p><div class="card"><h2>Da quale uso dell’IA vuoi partire?</h2><p>Descrivimi un’attività in cui usate l’intelligenza artificiale. Usa il registro per creare una scheda e il piano per annotare le verifiche necessarie.</p><div class="cards"><button data-start="census">Censisci un uso dell’IA<br>Parti da uno strumento e da un’attività.</button><button data-start="hr">Gestionale HR<br>Valuta l’uso dell’IA sui CV.</button><button data-start="plan">Rivedi il piano<br>Controlla le azioni aperte.</button></div><form id="homechat"><input name="message" maxlength="1500" aria-label="Domanda per il Copilota" placeholder="Es. Usiamo IA per rispondere ai clienti" required style="width:75%"><button>Invia</button></form></div>';
   } else if (page === "profile") {
     h +=
       '<div class="card"><h2>Profilo e visura</h2><p class="muted">Identifica l’organizzazione e il referente per la gestione della compliance IA.</p><form id="profileform"><label>Ragione sociale<input name="name" placeholder="Es. Rossi Srl" required value="' +
