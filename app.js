@@ -323,8 +323,8 @@ function syncOrg() {
     (managed ? "" : '<option value="new">Nuova organizzazione</option>');
   $("orgSelect").value = current.id;
   $("orgHeader").textContent = current.name || "Nessuna organizzazione selezionata";
-  $("orgHeader").closest(".header-workspace").classList.toggle("is-empty", !current.id);
-  $("orgHeaderLabel").textContent = current.id ? "ORGANIZZAZIONE ATTIVA" : "SPAZIO DI LAVORO";
+  $("orgHeader").closest(".header-workspace")?.classList.toggle("is-empty", !current.id);
+  if ($("orgHeaderLabel")) $("orgHeaderLabel").textContent = current.id ? "ORGANIZZAZIONE ATTIVA" : "SPAZIO DI LAVORO";
   renderOrgPicker();
 }
 function renderOrgPicker() {
@@ -337,7 +337,7 @@ function renderOrgPicker() {
     select.after(picker);
     select.hidden = true;
     document.addEventListener("click", (event) => {
-      if (!picker.contains(event.target)) closePicker();
+      if (!picker.contains(event.target) && !event.target.closest?.("#chooseWorkspace")) closePicker();
     });
     picker.addEventListener("keydown", (event) => {
       if (event.key === "Escape") { closePicker(); picker.querySelector(".org-picker-trigger")?.focus(); }
@@ -374,7 +374,6 @@ $("orgSelect").onchange = () => {
   state = current.data;
   $("messages").innerHTML =
     '<div class="bubble">Workspace cambiato. Come posso aiutarti?</div>';
-  persist();
   syncOrg();
   go("dashboard");
 };
@@ -391,6 +390,7 @@ $("orgForm").onsubmit = (e) => {
     return;
   }
   current = { ...f, id: crypto.randomUUID(), data: { systems: [], tasks: [] } };
+  prepareWorkspace(current);
   orgs.push(current);
   state = current.data;
   persist();
@@ -1677,7 +1677,7 @@ async function runForm(form, action) {
 function render() {
   if (!current.id && page !== "settings") {
     $("content").innerHTML = '<div class="card" style="max-width:720px;margin:8vh auto;padding:36px"><h1>Benvenuto in AI ACT</h1><p class="muted">Scegli un’organizzazione per accedere al suo spazio di lavoro oppure creane una nuova.</p><button id="chooseWorkspace">Seleziona organizzazione</button></div>';
-    $("chooseWorkspace").onclick = () => $("orgPicker")?.querySelector(".org-picker-trigger")?.click();
+    $("chooseWorkspace").onclick = (event) => { event.stopPropagation(); document.body.classList.add("mobileopen"); const trigger = $("orgPicker")?.querySelector(".org-picker-trigger"); if (trigger?.getAttribute("aria-expanded") !== "true") trigger?.click(); trigger?.focus(); };
     $("crumb").textContent = "Benvenuto";
     $("copilot").hidden = true;
     $("chat").hidden = true;
