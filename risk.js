@@ -83,7 +83,10 @@ export function localCopilot(question, workspace) {
   if (/chatgpt|copilot|gemini|claude|email|\bmail\b|bozz|registr|sistem|strument|usiamo|utilizziamo/.test(input)) {
     return { text: "Nel Registro IA hai " + workspace.systems.length + " sistemi. Per aggiungerne uno, indica strumento e finalità concreta. Se lo usi per scrivere email o bozze, annota anche chi rivede il risultato prima dell’invio.", action: "Apri il Registro IA", page: "systems" };
   }
-  if (/document|policy|visur|export|esport/.test(input)) {
+  if (/visur/.test(input)) {
+    return { text: "Apri il profilo dell’organizzazione per allegare o consultare la visura PDF.", action: "Apri Organizzazione", page: "profile" };
+  }
+  if (/document|policy|export|esport/.test(input)) {
     return { text: "In Documenti puoi esportare i registri e preparare una bozza di policy. Per aggiungere la visura PDF, apri il profilo dell’organizzazione.", action: "Apri Documenti", page: "docs" };
   }
   return { text: "Per orientarti, dimmi quale strumento usi e per quale attività. Per esempio «Usiamo ChatGPT per scrivere email» o «Usiamo l’IA per selezionare candidati». Se stai iniziando, segui i passaggi della dashboard.", action: "Apri la dashboard", page: "dashboard" };
@@ -118,4 +121,39 @@ export function assessmentChecks(scenario, role, transparency) {
   }
   checks.push({ id: "literacy", label: "Documentare le misure di alfabetizzazione IA in base a persone e contesto (art. 4)" });
   return checks;
+}
+
+/* Operational priorities, not a legal compliance score. */
+export function workspacePriorities(workspace, today = new Date()) {
+  const localDay = [
+    today.getFullYear(),
+    String(today.getMonth() + 1).padStart(2, "0"),
+    String(today.getDate()).padStart(2, "0")
+  ].join("-");
+  const horizon = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 30);
+  const lastDay = [
+    horizon.getFullYear(),
+    String(horizon.getMonth() + 1).padStart(2, "0"),
+    String(horizon.getDate()).padStart(2, "0")
+  ].join("-");
+  const validDate = value => {
+    if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+    const date = new Date(value + "T00:00:00Z");
+    return Number.isFinite(date.getTime()) && date.toISOString().slice(0,10) === value;
+  };
+  const byDate = (a,b) => a.date.localeCompare(b.date);
+  const systems = Array.isArray(workspace?.systems) ? workspace.systems : [];
+  const tasks = Array.isArray(workspace?.tasks) ? workspace.tasks : [];
+  const open = tasks.filter(x => x && x.status !== "Completata");
+  const screenings = systems.filter(x => x && !x.assessment?.date);
+  const reviews = systems.filter(x => x && validDate(x.assessment?.review))
+    .map(x => ({id:x.id,name:x.name,date:x.assessment.review}))
+    .filter(x => x.date <= lastDay).sort(byDate);
+  return {
+    overdue: open.filter(x => validDate(x.date) && x.date < localDay).sort(byDate),
+    upcoming: open.filter(x => validDate(x.date) && x.date >= localDay && x.date <= lastDay).sort(byDate),
+    screenings,
+    reviews,
+    prohibited: systems.filter(x => x && x.assessment?.scenario === "prohibited")
+  };
 }
