@@ -24,7 +24,7 @@ nav button[data-page].active, nav button[data-page][aria-current="page"] {
 }
 header { background: #F8F7FC; color: var(--ink); min-height: 62px; box-shadow: none; }
 header span { color: var(--muted); }
-#content { width: 100%; max-width: 1320px; padding: clamp(20px, 3.3vw, 48px); }
+#content { width: 100%; max-width: 1320px; padding: clamp(14px, 1.5vw, 22px) clamp(20px, 3.3vw, 48px) 24px; }
 h1, h2, h3, .metric { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; letter-spacing: -.018em; }
 h1 { font-size: clamp(1.9rem, 3.6vw, 2.9rem); line-height: 1.13; }
 h2 { line-height: 1.22; }
@@ -160,3 +160,11 @@ main,#content{background:transparent!important}
 
 /* Discreet legal links outside the dynamic workspace. */
 .site-legal-footer{max-width:1320px;width:100%;padding:16px clamp(20px,3.3vw,48px) 26px;text-align:center;color:#6D6582;font-size:12px}.site-legal-footer nav{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 20px;border-top:1px solid #D9C9F8;padding:16px 0 6px;margin:0}.site-legal-footer a{color:#66509E;text-decoration:none;font-weight:600}.site-legal-footer a:hover,.site-legal-footer a:focus-visible{text-decoration:underline}.site-legal-footer p{margin:6px 0 0}@media print{.site-legal-footer{display:none!important}}
+
+/* Compact, consistent vertical rhythm across all workspace pages. */
+#content > h1:first-child{margin-bottom:14px}
+#content > h1:first-child + p{margin-bottom:14px}
+#content > .card > h2:first-child,#content > .card > h3:first-child{margin-top:0}
+#content > .cards,#content > .doc-grid,#content > .settings-grid{margin-top:16px;margin-bottom:16px}
+#content .launch-grid,#content .source-grid{margin-top:16px;margin-bottom:16px}
+@media(max-width:760px){#content{padding-top:14px;padding-bottom:18px}#content > h1:first-child{margin-bottom:12px}}
