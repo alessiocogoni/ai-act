@@ -325,39 +325,7 @@ function syncOrg() {
   $("orgHeader").textContent = current.name || "Nessuna organizzazione selezionata";
   $("orgHeader").closest(".header-workspace")?.classList.toggle("is-empty", !current.id);
   if ($("orgHeaderLabel")) $("orgHeaderLabel").textContent = current.id ? "ORGANIZZAZIONE ATTIVA" : "SPAZIO DI LAVORO";
-  renderOrgPicker();
-}
-function renderOrgPicker() {
-  const select = $("orgSelect");
-  let picker = $("orgPicker");
-  if (!picker) {
-    picker = document.createElement("div");
-    picker.id = "orgPicker";
-    picker.className = "org-picker";
-    select.after(picker);
-    select.hidden = true;
-    document.addEventListener("click", (event) => {
-      if (!picker.contains(event.target) && !event.target.closest?.("#chooseWorkspace")) closePicker();
-    });
-    picker.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") { closePicker(); picker.querySelector(".org-picker-trigger")?.focus(); }
-    });
-  }
-  function closePicker() {
-    const menu = picker.querySelector(".org-picker-menu");
-    if (menu) menu.hidden = true;
-    picker.querySelector(".org-picker-trigger")?.setAttribute("aria-expanded", "false");
-  }
-  const initials = name => String(name || "Organizzazione").trim().split(/\s+/).slice(0,2).map(w=>w[0]||"").join("").toUpperCase();
-  picker.innerHTML = '<button type="button" class="org-picker-trigger" aria-expanded="false" aria-controls="orgPickerMenu"><span class="org-avatar">'+esc(current.id ? initials(current.name) : "＋")+'</span><span class="org-picker-copy"><small>SPAZIO DI LAVORO</small><strong>'+esc(current.name || "Seleziona organizzazione")+'</strong></span></button><div class="org-picker-menu" id="orgPickerMenu" hidden><div class="org-menu-title">Le tue organizzazioni</div><div class="org-menu-items">'+orgs.map(o=>'<button type="button" class="org-option'+(o.id===current.id?' selected':'')+'" data-org="'+esc(o.id)+'" '+(o.id===current.id?'aria-current="true"':'')+'><span class="org-avatar">'+esc(initials(o.name))+'</span><span class="org-option-name">'+esc(o.name)+'</span>'+(o.id===current.id?'<span class="org-check" aria-hidden="true">✓</span>':'')+'</button>').join("")+'</div>'+(!managed?'<button type="button" class="org-add" data-org="new"><span aria-hidden="true">＋</span> Nuova organizzazione</button>':'')+'</div>';
-  const trigger = picker.querySelector(".org-picker-trigger");
-  const menu = picker.querySelector(".org-picker-menu");
-  trigger.onclick = () => { menu.hidden = !menu.hidden; trigger.setAttribute("aria-expanded", String(!menu.hidden)); };
-  picker.querySelectorAll("[data-org]").forEach(button => button.onclick = () => {
-    closePicker();
-    select.value = button.dataset.org;
-    select.dispatchEvent(new Event("change", {bubbles:true}));
-  });
+  $("orgSelect").hidden = false;
 }
 $("orgSelect").onchange = () => {
   if (!$("orgSelect").value) return;
@@ -1677,7 +1645,22 @@ async function runForm(form, action) {
 function render() {
   if (!current.id && page !== "settings") {
     $("content").innerHTML = '<div class="card" style="max-width:720px;margin:8vh auto;padding:36px"><h1>Benvenuto in AI ACT</h1><p class="muted">Scegli un’organizzazione per accedere al suo spazio di lavoro oppure creane una nuova.</p><button id="chooseWorkspace">Seleziona organizzazione</button></div>';
-    $("chooseWorkspace").onclick = (event) => { event.stopPropagation(); document.body.classList.add("mobileopen"); const trigger = $("orgPicker")?.querySelector(".org-picker-trigger"); if (trigger?.getAttribute("aria-expanded") !== "true") trigger?.click(); trigger?.focus(); };
+    const choose = $("chooseWorkspace");
+    const list = document.createElement("div");
+    list.className = "workspace-choices";
+    for (const option of $("orgSelect").options) {
+      if (!option.value) continue;
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "secondary";
+      button.textContent = option.textContent;
+      button.onclick = () => {
+        $("orgSelect").value = option.value;
+        $("orgSelect").onchange();
+      };
+      list.append(button);
+    }
+    choose.replaceWith(list);
     $("crumb").textContent = "Benvenuto";
     $("copilot").hidden = true;
     $("chat").hidden = true;
