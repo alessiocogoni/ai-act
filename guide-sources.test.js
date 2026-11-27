@@ -1,0 +1,5 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {localCopilot} from "./risk.js";
+const cases=[["Cos’è un sistema di IA?","definition"],["Serve un attestato per la formazione?","literacyCertificate"],["È obbligatorio un AI officer?","aiOfficer"],["ChatGPT richiede formazione?","chatgptTraining"],["Devo avvisare gli utenti del chatbot?","chatbotNotice"],["Serve il watermark?","syntheticMark"],["Testi di interesse pubblico","publicText"],["App di nudification","newProhibition"],["Modelli GPAI prima del 2025","legacyGpai"],["Quali obblighi GPAI?","gpaiObligations"],["Legge italiana 132","italyLaw"],["Linee guida AgID per PA","paGuidelines"],["Eccezioni alto rischio","annexException"],["Quali sono i sistemi ad alto rischio?","highrisk"],["Quali sono gli obblighi privacy?","privacy"],["Qual è il mio ruolo?","roles"],["Usiamo IA per selezionare candidati","hr"],["Quali sono le scadenze normative?","deadlines"]];
+for(const [q,t] of cases) test(q,()=>{const result=localCopilot(q,{systems:[],tasks:[]});assert.equal(result.topic,t);assert.ok(result.references.length);});
